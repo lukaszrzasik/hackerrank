@@ -7,54 +7,51 @@ using namespace std;
 
 typedef pair<string, string> Position;
 
-bool isWinningPosition(string A, string B, const Position& pos)
+bool isWinningPosition(const string & A, const string & B, const Position & pos)
 {
     // TODO: add scenario with empty strings in pos
     // TODO: add scenario with the same substring several times in A or B
-    string firstSubstring = pos.first;
-    string secondSubstring = pos.second;
-    
-    int index = A.find(firstSubstring);
-    if(index == npos)
-    {
-        cout << "isWinningPosition: invalid situation, A = " << A << " firstSubstring = "
-            << firstSubstring << endl;
-        return false;
-    }
+    string & firstSubstring = pos.first;
+    string & secondSubstring = pos.second;
 
-    index += firstSubstring.length();
-    int numberFreeInA = A.length() - index;
-    
-    index = B.find(secondSubstring);
-    if(index == npos)
-    {
-        cout << "isWinningPosition: invalid situation, B = " << B << " secondSubstring = "
-            << secondSubstring << endl;
-        return false;
-    }
-    index += secondSubstring.length();
-    int numberFreeInB = B.length() - index;
-    
-    if((numberFreeInA + numberFreeInB) % 2 == 0) {
-        return false;
-    } else {
-        return true;
-    }
-}
+	bool oddFreeA = false;
+	bool evenFreeA = false;
+	bool oddFreeB = false;
+	bool evenFreeB = false;
 
-void findNextPosition(string A, string B, Position& pos) 
-{
-    if (pos.first == "") {
-        if (pos.second == "") {
-            for (char c = 'a'; c < 'z' + 1; ++c) {
-                if (npos != B.find(c)) {
-                    pos.second = c;
-                }
-            }
-        } else {
-            
-        }
-    }
+	unsigned int pos = 0;
+
+	while (int index = A.find(firstSubstring, pos) != npos) {
+		int freeNumber = A.size() - (index + firstSubstring.size());
+		bool even = freeNumber % 2 ? false : true;
+		if (even)
+			evenFreeA = true;
+		else 
+			oddFreeA = true;
+		++pos;
+		if (evenFreeA && oddFreeA)
+			break;
+	}
+
+ 	pos = 0;
+
+	while (int index = B.find(secondSubstring, pos) != npos) {
+		int freeNumber = B.size() - (index + secondSubstring.size());
+		bool even = freeNumber % 2 ? false : true;
+		if (even)
+			evenFreeB = true;
+		else 
+			oddFreeB = true;
+		++pos;
+		if (evenFreeB && oddFreeB)
+			break;
+	}
+	
+	bool loosingPos = (oddFreeA && evenFreeA && oddFreeB && evenFreeB) || 
+		(oddFreeA && oddFreeB && !evenFreeA && !evenFreeB) ||
+		(evenFreeA && evenFreeB && !oddFreeA && !oddFreeB);
+   
+	return loosingPos ? false : true;
 }
 
 int main() {
@@ -71,9 +68,14 @@ int main() {
     string A, B;
     getline(cin, A);
     getline(cin, B);
+
+	SubstringGenerator generatorA(A);
+	SubstringGenerator generatorB(B);
     
     Position position("", "");
+	int k = 0;
+	while (k != K) {
+	}
     
     return 0;
 }
-
