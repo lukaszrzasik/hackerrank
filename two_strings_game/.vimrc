@@ -6,4 +6,5 @@ set noexpandtab
 set colorcolumn=110
 highlight ColorColumn ctermbg=darkblue
 
-set syntax=cpp
+syntax on
+set number

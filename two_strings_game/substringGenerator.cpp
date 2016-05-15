@@ -7,40 +7,39 @@ SubstringGenerator::SubstringGenerator(const string &rhs) : mainString(rhs)
 		substrings[mainString[i] - 'a'].emplace_back(i, 1);
 	}
 
-	for(unsigned int i = 0; i < mainString.size(); ++i) {
-		if(!substrings[i].empty()) {
-			sortSubstringList(substrings[i]);
-			currentPos = make_tuple(i, substrings[i].begin(), 0);
-			break;
-		}
-	}
+	setInitialPos();
 }
 
 bool SubstringGenerator::nextSubstring(string &outSubstring)
 {
 	bool ret = false;
 	get<2>(currentPos)++;
-	if((int)(mainString.size() - get<2>(currentPos) - get<1>(currentPos)->first) < 0) {
-		get<1>(currentPos)++;
-		if(get<1>(currentPos) == substrings[get<0>(currentPos)].end()) {
-			get<0>(currentPos)++;
-			if(get<0>(currentPos) == substrings.size()) {
-				currentPos = make_tuple(0, substrings[0].begin(), 0);
-			} else {
-				while(substrings[get<0>(currentPos)].empty()) {
+	if (get<2>(currentPos) == 0) {
+		ret = true;
+	} else {
+		if((int)(mainString.size() - get<2>(currentPos) - get<1>(currentPos)->first) < 0) {
+			get<1>(currentPos)++;
+			if(get<1>(currentPos) == substrings[get<0>(currentPos)].end()) {
+				do {
 					get<0>(currentPos)++;
+				} while(substrings[get<0>(currentPos)].empty() && 
+						get<0>(currentPos) != substrings.size());
+				
+				if(get<0>(currentPos) == substrings.size()) {
+					setInitialPos();
+				} else {
+					sortSubstringList(substrings[get<0>(currentPos)]);
+					get<1>(currentPos) = substrings[get<0>(currentPos)].begin();
+					get<2>(currentPos) = 1;
+					ret = true;
 				}
-				sortSubstringList(substrings[get<0>(currentPos)]);
-				get<1>(currentPos) = substrings[get<0>(currentPos)].begin();
-				get<2>(currentPos) = 1;
+			} else {
+				get<2>(currentPos) = getDiffPos();
 				ret = true;
 			}
 		} else {
-			get<2>(currentPos) = getDiffPos();
 			ret = true;
 		}
-	} else {
-		ret = true;
 	}
 
 	if (ret) {
@@ -74,4 +73,15 @@ int SubstringGenerator::getDiffPos()
 	}
 
 	return 0;
+}
+
+void SubstringGenerator::setInitialPos()
+{
+	for(unsigned int i = 0; i < substrings.size(); ++i) {
+		if(!substrings[i].empty()) {
+			sortSubstringList(substrings[i]);
+			currentPos = make_tuple(i, substrings[i].begin(), -1);
+			break;
+		}
+	}
 }

@@ -25,10 +25,11 @@ private:
 	typedef pair<unsigned int, unsigned int> SubstringData;
 	typedef list<SubstringData> SubstringDataList;
 	typedef tuple<unsigned int, decltype(((SubstringDataList*)nullptr)->begin()), 
-			unsigned int> SubstringPosition;
+			int> SubstringPosition;
 
 	void sortSubstringList(SubstringDataList &list);
 	int getDiffPos();
+	void setInitialPos();
 
 	const string &mainString;
 	vector<SubstringDataList> substrings;

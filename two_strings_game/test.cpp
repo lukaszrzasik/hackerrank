@@ -6,7 +6,7 @@ using namespace std;
 
 int main()
 {
-	string str = "acegabzbfy";
+	string str = "cd";
 	SubstringGenerator generator(str);
 
 	string outStr;
