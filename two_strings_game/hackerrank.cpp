@@ -140,7 +140,7 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
     bool oddFreeB = false;
     bool evenFreeB = false;
 
-    unsigned int p = 0;
+    string::size_type p = 0;
     string::size_type index = 0;
 
     while ((index = A.find(firstSubstring, p)) != string::npos) {
@@ -151,7 +151,7 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
             evenFreeA = true;
         else
             oddFreeA = true;
-        ++p;
+        p = index + 1;
         if (evenFreeA && oddFreeA)
             break;
     }
@@ -167,7 +167,7 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
             evenFreeB = true;
         else
             oddFreeB = true;
-        ++p;
+        p = index + 1;
         if (evenFreeB && oddFreeB)
             break;
     }
