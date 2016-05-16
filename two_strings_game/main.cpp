@@ -67,7 +67,7 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
 	return loosingPos ? false : true;
 }
 
-void printOutput(Position & pos, int k)
+void printOutput(Position & pos, unsigned long long int k)
 {
 	cout << "k = " << k << ", position = " << pos.first << " , " << pos.second << endl; 
 }
@@ -77,11 +77,11 @@ int main() {
     
     string tempString;
     getline(cin, tempString, ' ');
-	int N = stoi(tempString);
+	unsigned int N = stoi(tempString);
     getline(cin, tempString, ' ');
-    int M = stoi(tempString);
+    unsigned int M = stoi(tempString);
     getline(cin, tempString);
-    int K = stoi(tempString);
+    unsigned long long int K = stoll(tempString);
     
     string A, B;
     getline(cin, A);
@@ -91,7 +91,7 @@ int main() {
 	SubstringGenerator generatorB(B);
     
     Position position;
-	int k = 0;
+	unsigned long long int k = 0;
 
 	string substringA;
 	string substringB;
