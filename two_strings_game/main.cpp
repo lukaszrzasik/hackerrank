@@ -25,10 +25,12 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
 	bool evenFreeB = false;
 
 	unsigned int p = 0;
+	string::size_type index = 0;
 
-	while (int index = A.find(firstSubstring, p) != string::npos) {
+	while ((index = A.find(firstSubstring, p)) != string::npos) {
 		int freeNumber = A.size() - (index + firstSubstring.size());
 		bool even = freeNumber % 2 ? false : true;
+		cout << " index in A = " << index << endl;
 		if (even)
 			evenFreeA = true;
 		else 
@@ -38,11 +40,13 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
 			break;
 	}
 
+	cout << "evenFreeA = " << evenFreeA << " oddFreeA = " << oddFreeA << endl;
  	p = 0;
 
-	while (int index = B.find(secondSubstring, p) != string::npos) {
+	while ((index = B.find(secondSubstring, p)) != string::npos) {
 		int freeNumber = B.size() - (index + secondSubstring.size());
 		bool even = freeNumber % 2 ? false : true;
+		cout << " index in B = " << index << endl;
 		if (even)
 			evenFreeB = true;
 		else 
@@ -52,6 +56,8 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
 			break;
 	}
 	
+	cout << "evenFreeB = " << evenFreeB << " oddFreeB = " << oddFreeB << endl;
+
 	bool loosingPos = (oddFreeA && evenFreeA && oddFreeB && evenFreeB) || 
 		(oddFreeA && oddFreeB && !evenFreeA && !evenFreeB) ||
 		(evenFreeA && evenFreeB && !oddFreeA && !oddFreeB);
