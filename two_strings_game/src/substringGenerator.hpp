@@ -22,16 +22,26 @@ public:
 	bool nextSubstring(string &outSubstring);	
 
 private:
-	typedef pair<unsigned int, unsigned int> SubstringData;
-	typedef list<SubstringData> SubstringDataList;
-	typedef tuple<unsigned int, decltype(((SubstringDataList*)nullptr)->begin()), 
-			int> SubstringPosition;
+	typedef unsigned int Position;
+	typedef int MinLength;
+	typedef int MaxLength;
+	typedef int CurrentLength;
+	typedef int SubstrNumber;
+	typedef tuple<Position, MinLength, MaxLength> SubstringData;
+	typedef pair<list<SubstringData>, SubstrNumber> SubstringDataList;
+	typedef tuple<unsigned int, decltype(((SubstringDataList*)nullptr)->first.begin()), 
+			CurrentLength> SubstringPosition;
+	typedef vector<SubstringDataList> Substrings;
 
 	void sortSubstringList(SubstringDataList &list);
 	int getDiffPos();
 	void setInitialPos();
+	void sortFirst();
+	void getMinLength();
+	void getMaxLength();
+	void setSubstrNumber();
 
 	const string &mainString;
-	vector<SubstringDataList> substrings;
+	Substrings substrings;
 	SubstringPosition currentPos;
 };
