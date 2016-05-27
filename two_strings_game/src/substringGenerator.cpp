@@ -45,7 +45,6 @@ bool SubstringGenerator::nextSubstring(string &outSubstring)
 				ret = true;
 			}
 		} else {
-			getMaxLength();
 			ret = true;
 		}
 	}
@@ -113,7 +112,7 @@ void SubstringGenerator::getMinLength()
 
 void SubstringGenerator::getMaxLength()
 {
-	get<2>(*get<1>(currentPos)) = mainString.size() - get<0>(*get<1>(currentPos)) + 1;
+	get<2>(*get<1>(currentPos)) = mainString.size() - get<0>(*get<1>(currentPos));
 }
 
 void SubstringGenerator::setSubstrNumber()
@@ -135,18 +134,33 @@ string SubstringGenerator::operator[](unsigned int pos)
 	unsigned int substrNr = 1;
 
 	for (unsigned int i = 0; i < substrings.size() - 1; ++i) {
-		substrNr += substrings[i].second;
-		if (pos < substrNr) {
-			substrNr -= substrings[i].second;
+		unsigned int substrWithLetterNr = 0;
+		if (substrings[i].second > 0) {
+			substrWithLetterNr = substrings[i].second;
+			substrNr += substrWithLetterNr;
+		}
+		if (pos < substrNr || (!substrings[i].first.empty() && substrings[i].second == 0)) {
+			substrNr -= substrWithLetterNr;
 			for (auto it = substrings[i].first.begin(); it != substrings[i].first.end();
 					++it) {
-				unsigned int substrInListNr = get<2>(*it) - get<1>(*it) + 1;
+				unsigned int substrInListNr = 0;
+				if (get<2>(*it) == 0) {
+					currentPos = make_tuple(i, it, 0);
+					getMinLength();
+					getMaxLength();
+				}
+
+				substrInListNr = get<2>(*it) - get<1>(*it) + 1;
 				substrNr += substrInListNr;
+
 				if (pos < substrNr) {
 					substrNr -= substrInListNr;
 					return mainString.substr(get<0>(*it), get<1>(*it) + pos - substrNr);
 				}
 			}
+			setSubstrNumber();
 		}
 	}
+
+	return "Not implemented yet";
 }

@@ -21,6 +21,8 @@ public:
 	 */
 	bool nextSubstring(string &outSubstring);	
 
+	string operator[](unsigned int pos);
+
 private:
 	typedef unsigned int Position;
 	typedef int MinLength;

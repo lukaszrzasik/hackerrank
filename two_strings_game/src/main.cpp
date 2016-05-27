@@ -9,7 +9,7 @@ using namespace std;
 
 typedef pair<string, string> Position;
 
-bool isWinningPosition(const string & A, const string & B, const Position & pos)
+int isWinningPosition(const string & A, const string & B, const Position & pos)
 {
     // TODO: add scenario with empty strings in pos
     // TODO: add scenario with the same substring several times in A or B
@@ -42,9 +42,9 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
 
 	cout << "evenFreeA = " << evenFreeA << " oddFreeA = " << oddFreeA << endl;
  	p = 0;
-
+	int freeNumberB;
 	while ((index = B.find(secondSubstring, p)) != string::npos) {
-		int freeNumber = B.size() - (index + secondSubstring.size());
+		freeNumberB = B.size() - (index + secondSubstring.size());
 		bool even = freeNumber % 2 ? false : true;
 		cout << " index in B = " << index << endl;
 		if (even)
@@ -57,6 +57,13 @@ bool isWinningPosition(const string & A, const string & B, const Position & pos)
 	}
 	
 	cout << "evenFreeB = " << evenFreeB << " oddFreeB = " << oddFreeB << endl;
+
+	bool isABoth = oddFreeA && evenFreeA;
+	int howMany = 0;
+
+	if (isABoth && (evenFreeB ^ oddFreeB)) {
+		howMany = freeNumberB; 
+	} else if (!isBoth && 
 
 	bool loosingPos = (oddFreeA && evenFreeA && oddFreeB && evenFreeB) || 
 		(oddFreeA && oddFreeB && !evenFreeA && !evenFreeB) ||
@@ -107,6 +114,6 @@ int main() {
 			}
 		}
 	}
-    
+
     return 0;
 }
