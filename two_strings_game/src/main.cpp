@@ -70,7 +70,7 @@ pair<int,int> isWinningPosition(const string & A, const string & B, const Positi
 	} else if (isBBoth) {
 		// TODO: this can be optimized
 		cout << "isBBoth" << endl;
-		return make_pair(1, 1);
+		return make_pair(1, 0);
 	} else if (oddFreeB) {
 		cout << "oddFreeB" << endl;
 		return make_pair(freeNumberB/2 + 1, freeNumberB);
@@ -110,7 +110,8 @@ int main() {
     
     Position position;
 	unsigned long long int k = 0;
-	unsigned long long int i = 0;
+	unsigned int a = 0;
+	unsigned int b = 0;
 
 	cout << "K = " << K << endl;
 
@@ -118,27 +119,36 @@ int main() {
 	string substringB;
 	while (generatorA.nextSubstring(substringA)) {
 		while (generatorB.nextSubstring(substringB)) {
-			cout << "i = " << i << endl;
+			cout << "a = " << a << endl;
+			cout << "b = " << b << endl;
 			cout << "k = " << k << endl;
 			position = make_pair(substringA, substringB);
 			auto newPosition = isWinningPosition(A, B, position);
 			cout << "newPosition = " << newPosition.first << ',' << newPosition.second << endl; 
 			if (k + newPosition.first == K) {
-				substringB = generatorB[i + newPosition.first];
+				cout << "k + newPosition.first == K" << endl;
+				k = k + newPosition.first;
+				substringB = generatorB[b + newPosition.first - 1];
 				position = make_pair(substringA, substringB);
 				printOutput(position, k);
 				return 0;
 			} else if (k + newPosition.first > K) {
-				substringB = generatorB[i + newPosition.first - K];
+				cout << "k + newPosition.first > K" << endl;
+				k = k + newPosition.first - K;
+				substringB = generatorB[b + newPosition.first - K - 1];
 				position = make_pair(substringA, substringB);
 				printOutput(position, k);
 				return 0;
 			} else {
 				k += newPosition.first;
-				i += newPosition.second;
-				generatorB[i];
+				b += newPosition.second;
+				generatorB[b];
 			}
+			++b;
+			cout << endl;
 		}
+		b = 0;
+		++a;
 	}
 
     return 0;

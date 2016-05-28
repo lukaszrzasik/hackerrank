@@ -1,3 +1,4 @@
+#include <iostream>
 #include "substringGenerator.hpp"
 
 SubstringGenerator::SubstringGenerator(const string &rhs) : mainString(rhs)
@@ -127,6 +128,8 @@ void SubstringGenerator::setSubstrNumber()
 
 string SubstringGenerator::operator[](unsigned int pos)
 {
+	cout << __func__ << ": pos = " << pos << endl;
+
 	if (pos == 0) {
 		currentPos = make_tuple(0, substrings[0].first.begin(), 0);
 		return "";
@@ -157,6 +160,8 @@ string SubstringGenerator::operator[](unsigned int pos)
 				if (pos < substrNr) {
 					substrNr -= substrInListNr;
 					currentPos = make_tuple(i, it, get<1>(*it) + pos - substrNr);
+					cout << __func__ << ": currentPos = " << get<0>(currentPos) << ',' 
+						<< get<2>(currentPos) << endl;
 					return mainString.substr(get<0>(*it), get<1>(*it) + pos - substrNr);
 				}
 			}
