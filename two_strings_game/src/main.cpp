@@ -9,7 +9,7 @@ using namespace std;
 
 typedef pair<string, string> Position;
 
-int isWinningPosition(const string & A, const string & B, const Position & pos)
+pair<int,int> isWinningPosition(const string & A, const string & B, const Position & pos)
 {
     // TODO: add scenario with empty strings in pos
     // TODO: add scenario with the same substring several times in A or B
@@ -45,7 +45,7 @@ int isWinningPosition(const string & A, const string & B, const Position & pos)
 	int freeNumberB;
 	while ((index = B.find(secondSubstring, p)) != string::npos) {
 		freeNumberB = B.size() - (index + secondSubstring.size());
-		bool even = freeNumber % 2 ? false : true;
+		bool even = freeNumberB % 2 ? false : true;
 		cout << " index in B = " << index << endl;
 		if (even)
 			evenFreeB = true;
@@ -59,19 +59,30 @@ int isWinningPosition(const string & A, const string & B, const Position & pos)
 	cout << "evenFreeB = " << evenFreeB << " oddFreeB = " << oddFreeB << endl;
 
 	bool isABoth = oddFreeA && evenFreeA;
-	int howMany = 0;
+	bool isBBoth = oddFreeB && evenFreeB;
 
-	if (isABoth && (evenFreeB ^ oddFreeB)) {
-		howMany = freeNumberB; 
-	} else if (!isBoth && 
+	if (isABoth && isBBoth) {
+		cout << "isABoth && isBBoth" << endl;
+		return make_pair(0, 0);
+	} else if (isABoth) {
+		cout << "isABoth" << endl;
+		return make_pair(freeNumberB + 1, freeNumberB);
+	} else if (isBBoth) {
+		// TODO: this can be optimized
+		cout << "isBBoth" << endl;
+		return make_pair(1, 1);
+	} else if (oddFreeB) {
+		cout << "oddFreeB" << endl;
+		return make_pair(freeNumberB/2 + 1, freeNumberB);
+	} 
 
-	bool loosingPos = (oddFreeA && evenFreeA && oddFreeB && evenFreeB) || 
-		(oddFreeA && oddFreeB && !evenFreeA && !evenFreeB) ||
-		(evenFreeA && evenFreeB && !oddFreeA && !oddFreeB);
+	if (evenFreeA) {
+		cout << "evenFreeA" << endl;
+		return make_pair(freeNumberB/2, freeNumberB);
+	}
 
-	cout << "loosingPos = " << loosingPos << endl;
-   
-	return loosingPos ? false : true;
+	cout << "else" << endl;
+	return make_pair(freeNumberB/2 + 1, freeNumberB);
 }
 
 void printOutput(Position & pos, unsigned long long int k)
@@ -99,18 +110,33 @@ int main() {
     
     Position position;
 	unsigned long long int k = 0;
+	unsigned long long int i = 0;
+
+	cout << "K = " << K << endl;
 
 	string substringA;
 	string substringB;
 	while (generatorA.nextSubstring(substringA)) {
 		while (generatorB.nextSubstring(substringB)) {
+			cout << "i = " << i << endl;
+			cout << "k = " << k << endl;
 			position = make_pair(substringA, substringB);
-			if (isWinningPosition(A, B, position)) {
-				++k;
-				if (k == K) {
-					printOutput(position, k);
-					return 0;
-				}
+			auto newPosition = isWinningPosition(A, B, position);
+			cout << "newPosition = " << newPosition.first << ',' << newPosition.second << endl; 
+			if (k + newPosition.first == K) {
+				substringB = generatorB[i + newPosition.first];
+				position = make_pair(substringA, substringB);
+				printOutput(position, k);
+				return 0;
+			} else if (k + newPosition.first > K) {
+				substringB = generatorB[i + newPosition.first - K];
+				position = make_pair(substringA, substringB);
+				printOutput(position, k);
+				return 0;
+			} else {
+				k += newPosition.first;
+				i += newPosition.second;
+				generatorB[i];
 			}
 		}
 	}
