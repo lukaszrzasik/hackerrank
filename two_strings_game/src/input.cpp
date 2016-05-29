@@ -7,11 +7,14 @@ int main()
 {
 	mt19937_64 generator;
 	uniform_int_distribution<unsigned int> distribution(1U,300000U);
-	unsigned int N = distribution(generator);
-	unsigned int M = distribution(generator);
+//	unsigned int N = distribution(generator);
+	unsigned int N = 3;
+//	unsigned int M = distribution(generator);
+	unsigned int M = 3;
 	
 	uniform_int_distribution<unsigned long long int> distributionBig(1ULL,1000000000000000000ULL);
-	unsigned long long int K = distributionBig(generator);
+//	unsigned long long int K = distributionBig(generator);
+	unsigned long long int K = 1;
 
 	uniform_int_distribution<int> distributionAlph('a','z');
 
