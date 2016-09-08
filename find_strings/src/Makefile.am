@@ -1,2 +1,2 @@
-bin_PROGRAMS = hello
-hello_SOURCES = main.c
+bin_PROGRAMS = trivialMain
+trivialMain_SOURCES = trivialMain.cpp
