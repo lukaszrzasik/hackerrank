@@ -86,7 +86,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = trivialMain$(EXEEXT)
+bin_PROGRAMS = trivialMain$(EXEEXT) generateInput$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -99,6 +99,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am_generateInput_OBJECTS = generateInput.$(OBJEXT)
+generateInput_OBJECTS = $(am_generateInput_OBJECTS)
+generateInput_LDADD = $(LDADD)
 am_trivialMain_OBJECTS = trivialMain.$(OBJEXT)
 trivialMain_OBJECTS = $(am_trivialMain_OBJECTS)
 trivialMain_LDADD = $(LDADD)
@@ -131,8 +134,8 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(trivialMain_SOURCES)
-DIST_SOURCES = $(trivialMain_SOURCES)
+SOURCES = $(generateInput_SOURCES) $(trivialMain_SOURCES)
+DIST_SOURCES = $(generateInput_SOURCES) $(trivialMain_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -244,6 +247,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 trivialMain_SOURCES = trivialMain.cpp
+generateInput_SOURCES = generateInput.cpp
 all: all-am
 
 .SUFFIXES:
@@ -320,6 +324,10 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
+generateInput$(EXEEXT): $(generateInput_OBJECTS) $(generateInput_DEPENDENCIES) $(EXTRA_generateInput_DEPENDENCIES) 
+	@rm -f generateInput$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(generateInput_OBJECTS) $(generateInput_LDADD) $(LIBS)
+
 trivialMain$(EXEEXT): $(trivialMain_OBJECTS) $(trivialMain_DEPENDENCIES) $(EXTRA_trivialMain_DEPENDENCIES) 
 	@rm -f trivialMain$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(trivialMain_OBJECTS) $(trivialMain_LDADD) $(LIBS)
@@ -330,6 +338,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generateInput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trivialMain.Po@am__quote@
 
 .cpp.o:

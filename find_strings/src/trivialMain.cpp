@@ -21,34 +21,50 @@ using namespace std;
 
 /* Head ends here */
 void findStrings (vector <string>a, vector <int> a_query) {
+	// cout << "Input strings:" << endl;
+
     set<string> strings;
     for (string& s : a)
     {
-	for (int i = 0; i < s.size(); ++i)
-	{
-            for (int j = 1; i + j <= s.size(); ++j)
-	    {
-		strings.emplace(s.substr(i,j));
-	    }
-	}
+		// cout << s << endl;
+
+		for (unsigned long i = 0; i < s.size(); ++i)
+		{
+			for (unsigned long j = 1; i + j <= s.size(); ++j)
+			{
+				strings.emplace(s.substr(i,j));
+			}
+		}
     }
+
+	// cout << endl << "All strings combined:" << endl;
+	// int no = 1;
+//	for (const string& s : strings)
+//	{
+		// cout << no++ << ": " << s << endl;
+//	}
+	
+	// cout << endl << "Queries:" << endl;
 
     for (int q : a_query) 
     {
-	auto it = strings.cbegin();
-	while(--q>0)
-	{
-	    ++it;
-	}
+		// cout << q << endl;
 
-	if (it != strings.cend())
-	{
-	    cout << *it << endl;
-	}
-	else 
-	{
-	    cout << "INVALID" << endl;
-	}
+		auto it = strings.cbegin();
+		while(--q>0)
+		{
+			if (++it == strings.cend())
+				break;
+		}
+
+		if (it != strings.cend())
+		{
+			cout << *it << endl;
+		}
+		else 
+		{
+			cout << "INVALID" << endl;
+		}
     }
 }
 
