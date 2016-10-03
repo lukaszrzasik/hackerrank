@@ -2,12 +2,14 @@
 
 #include <string>
 
+using namespace std;
+
 class IStringer
 {
 public:
 	virtual ~IStringer() {}
 
-	string operator[] (unsigned int query) = 0;
+	virtual string operator[] (unsigned int query) = 0;
 
 protected:
 private:

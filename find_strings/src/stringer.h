@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <vector>
 
 #include "istringer.h"
 
@@ -8,8 +8,11 @@ class Stringer : public IStringer
 {
 public:
 	Stringer() = delete;
-	Stringer(vector<string> strings);
+	Stringer(const vector<string> & strings);
+
+	virtual string operator[] (unsigned int query);
 
 protected:
 private:
+	string m_combinedString;
 };
