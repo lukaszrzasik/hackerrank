@@ -87,7 +87,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-noinst_PROGRAMS = trivialMain$(EXEEXT) generateInput$(EXEEXT)
+noinst_PROGRAMS = trivialMain$(EXEEXT) generateInput$(EXEEXT) \
+	mainTest$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -108,10 +109,17 @@ libstringer_a_AR = $(AR) $(ARFLAGS)
 libstringer_a_LIBADD =
 am_libstringer_a_OBJECTS = stringer.$(OBJEXT)
 libstringer_a_OBJECTS = $(am_libstringer_a_OBJECTS)
+libsubstrsorter_a_AR = $(AR) $(ARFLAGS)
+libsubstrsorter_a_LIBADD =
+am_libsubstrsorter_a_OBJECTS = substrSorter.$(OBJEXT)
+libsubstrsorter_a_OBJECTS = $(am_libsubstrsorter_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_generateInput_OBJECTS = generateInput.$(OBJEXT)
 generateInput_OBJECTS = $(am_generateInput_OBJECTS)
 generateInput_LDADD = $(LDADD)
+am_mainTest_OBJECTS = mainTest.$(OBJEXT)
+mainTest_OBJECTS = $(am_mainTest_OBJECTS)
+mainTest_DEPENDENCIES = libsubstrsorter.a
 am_trivialMain_OBJECTS = trivialMain.$(OBJEXT)
 trivialMain_OBJECTS = $(am_trivialMain_OBJECTS)
 trivialMain_LDADD = $(LDADD)
@@ -144,9 +152,11 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libstringer_a_SOURCES) $(generateInput_SOURCES) \
+SOURCES = $(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(generateInput_SOURCES) $(mainTest_SOURCES) \
 	$(trivialMain_SOURCES)
-DIST_SOURCES = $(libstringer_a_SOURCES) $(generateInput_SOURCES) \
+DIST_SOURCES = $(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(generateInput_SOURCES) $(mainTest_SOURCES) \
 	$(trivialMain_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -267,8 +277,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 trivialMain_SOURCES = trivialMain.cpp
 generateInput_SOURCES = generateInput.cpp
-noinst_LIBRARIES = libstringer.a
+mainTest_SOURCES = mainTest.cpp libsubstrsorter.a
+mainTest_LDADD = libsubstrsorter.a
+noinst_LIBRARIES = libstringer.a libsubstrsorter.a
 libstringer_a_SOURCES = stringer.cpp
+libsubstrsorter_a_SOURCES = substrSorter.cpp
 all: all-am
 
 .SUFFIXES:
@@ -311,12 +324,21 @@ libstringer.a: $(libstringer_a_OBJECTS) $(libstringer_a_DEPENDENCIES) $(EXTRA_li
 	$(AM_V_AR)$(libstringer_a_AR) libstringer.a $(libstringer_a_OBJECTS) $(libstringer_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libstringer.a
 
+libsubstrsorter.a: $(libsubstrsorter_a_OBJECTS) $(libsubstrsorter_a_DEPENDENCIES) $(EXTRA_libsubstrsorter_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libsubstrsorter.a
+	$(AM_V_AR)$(libsubstrsorter_a_AR) libsubstrsorter.a $(libsubstrsorter_a_OBJECTS) $(libsubstrsorter_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libsubstrsorter.a
+
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
 generateInput$(EXEEXT): $(generateInput_OBJECTS) $(generateInput_DEPENDENCIES) $(EXTRA_generateInput_DEPENDENCIES) 
 	@rm -f generateInput$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(generateInput_OBJECTS) $(generateInput_LDADD) $(LIBS)
+
+mainTest$(EXEEXT): $(mainTest_OBJECTS) $(mainTest_DEPENDENCIES) $(EXTRA_mainTest_DEPENDENCIES) 
+	@rm -f mainTest$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(mainTest_OBJECTS) $(mainTest_LDADD) $(LIBS)
 
 trivialMain$(EXEEXT): $(trivialMain_OBJECTS) $(trivialMain_DEPENDENCIES) $(EXTRA_trivialMain_DEPENDENCIES) 
 	@rm -f trivialMain$(EXEEXT)
@@ -329,7 +351,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generateInput.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mainTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substrSorter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trivialMain.Po@am__quote@
 
 .cpp.o:

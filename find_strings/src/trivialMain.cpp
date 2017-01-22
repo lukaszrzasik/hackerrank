@@ -20,7 +20,7 @@
 using namespace std;
 
 /* Head ends here */
-void findStrings (vector <string>a, vector <int> a_query) {
+void findStrings (vector<string> a, vector<int> a_query) {
 	// cout << "Input strings:" << endl;
 
     set<string> strings;

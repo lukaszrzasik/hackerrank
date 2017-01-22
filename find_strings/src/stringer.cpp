@@ -1,19 +1,22 @@
 #include "stringer.h"
 
-Stringer::Stringer(const vector<string> & strings)
+std::string Stringer::operator[] (unsigned int query) const
 {
-	for (string s : strings)
-	{
-		switch (s.size() % 3)
-		{
-			case 0 : s += '0' + '0' + '0';
-			case 1 : s += '0' + '0';
-			case 2 : s += '0';
-		}
-		m_combinedString += s;
+	if (invalidated) {
+		sorter.passAndSort(strings);
+		invalidated = false;
 	}
+	return sorter.getSubstr(query);
 }
 
-string Stringer::operator[] (unsigned int query)
+void Stringer::addString(const std::string& w)
 {
+	strings.push_back(w);
+	invalidated = true;
+}
+
+void Stringer::clearStrings()
+{
+	strings.clear();
+	invalidated = true;
 }

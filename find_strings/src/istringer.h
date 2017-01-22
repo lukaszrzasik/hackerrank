@@ -2,15 +2,10 @@
 
 #include <string>
 
-using namespace std;
-
 class IStringer
 {
 public:
-	virtual ~IStringer() {}
-
-	virtual string operator[] (unsigned int query) = 0;
-
-protected:
-private:
+	virtual std::string operator[] (const unsigned int query) const = 0;
+	virtual void addString(const std::string& w) = 0;
+	virtual void clearStrings() = 0;
 };

@@ -3,16 +3,17 @@
 #include <vector>
 
 #include "istringer.h"
+#include "substrSorter.h"
 
 class Stringer : public IStringer
 {
 public:
-	Stringer() = delete;
-	Stringer(const vector<string> & strings);
+	virtual std::string operator[] (const unsigned int query) const;
+	virtual void addString(const std::string& w);
+	virtual void clearStrings();
 
-	virtual string operator[] (unsigned int query);
-
-protected:
 private:
-	string m_combinedString;
+	std::vector<std::string> strings;
+	mutable SubstrSorter sorter;
+	mutable bool invalidated = true;
 };
