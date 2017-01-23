@@ -15,12 +15,11 @@ void SubstrSorter::passAndSort(const std::vector<std::string>& strings)
 	divideCombinedStrings();
 	radixSort(s12, engAlphSize, 3);
 
-	std::vector<int> s12encoded(s12.size());
-	if (encodeS12(s12encoded)) {
-		translateS12(s12encoded);
+	if (encodeS12()) {
+		translateS12();
 	}
 
-	decodeS12(s12encoded);
+	decodeS12();
 
 	revertNormalizedCombinedStrings();
 }
@@ -98,8 +97,11 @@ void SubstrSorter::radixSort(std::vector<int>& saToSort, int alphabetSize, int s
 }
 
 // returns true if the s12 needs further sorting
-bool SubstrSorter::encodeS12(std::vector<int>& s12encoded)
+bool SubstrSorter::encodeS12()
 {
+	s12encoded.clear();
+	s12encoded.resize(s12.size());
+
 	int previousElement = s12[0];
 	unsigned int currentValue = combinedStrings[s12[0]] == 0 ? 0 : 1;
 	bool needsSorting = false;
@@ -157,7 +159,7 @@ char SubstrSorter::isWordEnd(int a)
 	return 1;
 }
 
-void SubstrSorter::decodeS12(const std::vector<int>& s12encoded)
+void SubstrSorter::decodeS12()
 {
 	unsigned int i = 0;
 	int lastPosition = 0;
@@ -179,42 +181,43 @@ void SubstrSorter::decodeS12(const std::vector<int>& s12encoded)
 	s12.shrink_to_fit();
 }
 
-void SubstrSorter::translateS12(std::vector<int>& strings)
+void SubstrSorter::translateS12()
 {
 	SubstrSorter recursiveAlg;
+	recursiveAlg.combinedStrings = s12encoded;
+	if (recursiveAlg.combinedStrings[recursiveAlg.combinedStrings.size() - 1] != 0) {
+		recursiveAlg.combinedStrings.push_back(0);
+	}
 	recursiveAlg.combinedStrings.push_back(0); // add trailing zeroes
 	recursiveAlg.combinedStrings.push_back(0); // add trailing zeroes
-	recursiveAlg.combinedStrings = strings;
 	recursiveAlg.divideCombinedStrings();
 	recursiveAlg.radixSort(recursiveAlg.s12, recursiveAlg.s12.size(), 3);
 
-	std::vector<int> s12encoded(recursiveAlg.s12.size());
-	if (encodeS12(s12encoded)) {
-		recursiveAlg.translateS12(s12encoded);
+	if (encodeS12()) {
+		recursiveAlg.translateS12();
 	}
 
-	recursiveAlg.radixSortBasedOnS12(recursiveAlg.s0, s12encoded);
+	recursiveAlg.radixSortBasedOnS12(recursiveAlg.s0);
 	recursiveAlg.radixSort(recursiveAlg.s0, recursiveAlg.combinedStrings.size(), 1);
 
-	recursiveAlg.radixSortBasedOnS12(recursiveAlg.s12, s12encoded);
+	recursiveAlg.radixSortBasedOnS12(recursiveAlg.s12);
 
-
-	decodeS12(s12encoded);
+	decodeS12();
 }
 
-void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, const std::vector<int>& baseString)
+void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort)
 {
-	int alphabetSize = baseString.size();
+	int alphabetSize = s12encoded.size();
 	// count items
 	std::vector<int> alphabetCounter(alphabetSize, 0);
 	for (const int i : saToSort) {
 		int basePos;
 		if (i % 3 == 2) {
-			basePos = i / 3 + (baseString.size() + 1) / 2;
+			basePos = i / 3 + (s12encoded.size() + 1) / 2;
 		} else {
 			basePos = i / 3;
 		}
-		alphabetCounter[abs(baseString[basePos])]++;
+		alphabetCounter[abs(s12encoded[basePos])]++;
 	}	
 
 	// accumulate positions
@@ -229,28 +232,115 @@ void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, const std::ve
 	for (unsigned int i = 0; i < saToSort.size(); ++i) {
 		int basePos;
 		if (saToSortCopy[i] % 3 == 2) {
-			basePos = saToSortCopy[i] / 3 + (baseString.size() + 1) / 2;
+			basePos = saToSortCopy[i] / 3 + (s12encoded.size() + 1) / 2;
 		} else {
 			basePos = saToSortCopy[i] / 3;
 		}
-		saToSort[alphabetCounter[abs(baseString[basePos])]++] =
+		saToSort[alphabetCounter[abs(s12encoded[basePos])]++] =
 			saToSortCopy[i];
 	}
 }
 
-void SubstrSorter::merge(std::vector<int>& mergeString, const std::vector<int>& s12encoded)
+void SubstrSorter::merge(std::vector<int>& mergeString)
 {
 	mergeString.clear();
 	mergeString.reserve(s0.size() * 3);
 	auto s0it = s0.cbegin();
 	auto s12it = s12.cbegin();
-	while (s0it != s0.cend() || s12it != s12.cend()) {
-		
+	while (s0it != s0.cend() && s12it != s12.cend()) {
+		int result = compare(*s0it, *s12it);
+		switch (result) {
+		case -1:
+			mergeString.push_back(*s0it++);
+			break;
+		case 1:
+			mergeString.push_back(*s12it++);
+			break;
+		case 0:
+			if (*s0it < *s12it) {
+				mergeString.push_back(*s0it++);
+				mergeString.push_back(*s12it++);
+			} else {
+				mergeString.push_back(*s12it++);
+				mergeString.push_back(*s0it++);
+			}
+			break;
+		default:
+			break;
+		}
 	}
 
+	while (s0it != s0.cend()) {
+		mergeString.push_back(*s0it++);
+	}
+
+	while (s12it != s12.cend()) {
+		mergeString.push_back(*s12it++);
+	}
 }
 
+int SubstrSorter::compare(int a, int b)
+{
+	bool a0 = a % 3 == 0;
+	bool a1 = a % 3 == 1;
+	bool a2 = a % 3 == 2;
+	bool b0 = b % 3 == 0;
+	bool b1 = b % 3 == 1;
+	bool b2 = b % 3 == 2;
 
+	if (!a0 && !b0) {
+		int aEncoded = a1 ? s12encoded[a / 3] : s12encoded[a / 3 + (s12encoded.size() + 1) / 2];
+		int bEncoded = a1 ? s12encoded[b / 3] : s12encoded[b / 3 + (s12encoded.size() + 1) / 2];
+		if  (abs(aEncoded) < abs(bEncoded)) {
+			return -1;
+		} else if (abs(aEncoded) > abs(bEncoded)) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	if (a0 && b1) {
+		if (abs(combinedStrings[a]) < abs(combinedStrings[b])) {
+			return -1;
+		} else if (abs(combinedStrings[a]) > abs(combinedStrings[b])) {
+			return 1;
+		}
+		int aEncoded = s12encoded[(a + 1) / 3];
+		int bEncoded = s12encoded[(b + 1) / 3 + (s12encoded.size() + 1) / 2];
+		if  (abs(aEncoded) < abs(bEncoded)) {
+			return -1;
+		} else if (abs(aEncoded) > abs(bEncoded)) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	if (a0 && b2) {
+		if (abs(combinedStrings[a]) < abs(combinedStrings[b])) {
+			return -1;
+		} else if (abs(combinedStrings[a]) > abs(combinedStrings[b])) {
+			return 1;
+		}
+		if (abs(combinedStrings[a + 1]) < abs(combinedStrings[b + 1])) {
+			return -1;
+		} else if (abs(combinedStrings[a + 1]) > abs(combinedStrings[b + 1])) {
+			return 1;
+		}
+		int aEncoded = s12encoded[(a + 2) / 3 + (s12encoded.size() + 1) / 2];
+		int bEncoded = s12encoded[(b + 2) / 3];
+		if  (abs(aEncoded) < abs(bEncoded)) {
+			return -1;
+		} else if (abs(aEncoded) > abs(bEncoded)) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	return 0;
+}
 
 
 

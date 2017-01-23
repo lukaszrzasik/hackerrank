@@ -44,14 +44,13 @@ public:
 
 		s.radixSort(s.s12, 27, 3);
 
-		std::vector<int> s12encoded(s.s12.size());
-		bool recurse = s.encodeS12(s12encoded);
+		bool recurse = s.encodeS12();
 		for (const int i : s.s12) {
 			cout << i << ' ';
 		}
 		cout << endl;
 
-		for (int i : s12encoded) {
+		for (int i : s.s12encoded) {
 			cout << i << ' ';
 		}
 		cout << endl;
@@ -59,7 +58,10 @@ public:
 		if (recurse) {
 			cout << "Recurse" << endl;
 			SubstrSorter recursiveAlg;
-			recursiveAlg.combinedStrings = s12encoded;
+			recursiveAlg.combinedStrings = s.s12encoded;
+			if (recursiveAlg.combinedStrings[recursiveAlg.combinedStrings.size() - 1] != 0) {
+				recursiveAlg.combinedStrings.push_back(0);
+			}
 			recursiveAlg.combinedStrings.push_back(0);
 			recursiveAlg.combinedStrings.push_back(0);
 			for (const int c : recursiveAlg.combinedStrings) {
@@ -87,16 +89,26 @@ public:
 			}
 			cout << endl;
 
-			std::vector<int> s12encodedV2(recursiveAlg.s12.size());
-			bool recurse = recursiveAlg.encodeS12(s12encodedV2);
+			bool recurse = recursiveAlg.encodeS12();
 
-			for (int i : s12encodedV2) {
+			for (int i : recursiveAlg.s12encoded) {
 				cout << i << ' ';
 			}
 			cout << endl;
 
 			if (recurse) {
 				cout << "Have to recurse again? wtf?" << endl;
+				for (const int i : recursiveAlg.s12) {
+					cout << i << ' ';
+				}
+				cout << endl;
+
+				recursiveAlg.radixSortBasedOnS12(recursiveAlg.s12);
+
+				for (const int i : recursiveAlg.s12) {
+					cout << i << ' ';
+				}
+				cout << endl;
 			}
 
 			for (const int i : recursiveAlg.s0) {
@@ -104,7 +116,7 @@ public:
 			}
 			cout << endl;
 
-			recursiveAlg.radixSortBasedOnS12(recursiveAlg.s0, s12encodedV2);
+			recursiveAlg.radixSortBasedOnS12(recursiveAlg.s0);
 			recursiveAlg.radixSort(recursiveAlg.s0, recursiveAlg.combinedStrings.size(), 1);
 
 			for (const int i : recursiveAlg.s0) {
@@ -112,14 +124,9 @@ public:
 			}
 			cout << endl;
 
-			for (const int i : recursiveAlg.s12) {
-				cout << i << ' ';
-			}
-			cout << endl;
+			recursiveAlg.merge(recursiveAlg.SA);
 
-			recursiveAlg.radixSortBasedOnS12(recursiveAlg.s12, s12encodedV2);
-
-			for (const int i : recursiveAlg.s12) {
+			for (int i : recursiveAlg.SA) {
 				cout << i << ' ';
 			}
 			cout << endl;
