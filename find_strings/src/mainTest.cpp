@@ -103,7 +103,7 @@ public:
 				}
 				cout << endl;
 
-				recursiveAlg.radixSortBasedOnS12(recursiveAlg.s12);
+				recursiveAlg.radixSortBasedOnS12(recursiveAlg.s12, 0);
 
 				for (const int i : recursiveAlg.s12) {
 					cout << i << ' ';
@@ -116,7 +116,7 @@ public:
 			}
 			cout << endl;
 
-			recursiveAlg.radixSortBasedOnS12(recursiveAlg.s0);
+			recursiveAlg.radixSortBasedOnS12(recursiveAlg.s0, 1);
 			recursiveAlg.radixSort(recursiveAlg.s0, recursiveAlg.combinedStrings.size(), 1);
 
 			for (const int i : recursiveAlg.s0) {
@@ -124,17 +124,60 @@ public:
 			}
 			cout << endl;
 
-			recursiveAlg.merge(recursiveAlg.SA);
+			recursiveAlg.merge();
 
 			for (int i : recursiveAlg.SA) {
 				cout << i << ' ';
 			}
 			cout << endl;
+
+			for (int i : s.s12encoded) {
+				cout << i << ' ';
+			}
+			cout << endl;
+
+			recursiveAlg.deepEncode(s.s12encoded);
+
+			for (int i : s.s12encoded) {
+				cout << i << ' ';
+			}
+			cout << endl;
+			
+			for (const int i : s.s12) {
+				cout << i << ' ';
+			}
+			cout << endl;
+
+			s.radixSortBasedOnS12(s.s12, 0);
+
+			for (const int i : s.s12) {
+				cout << i << ' ';
+			}
+			cout << endl;
 		}
 
-		
+		for (const int i : s.s0) {
+			cout << i << ' ';
+		}
+		cout << endl;
+
+		s.radixSortBasedOnS12(s.s0, 1);
+		s.radixSort(s.s0, 27, 1);
+
+		for (const int i : s.s0) {
+			cout << i << ' ';
+		}
+		cout << endl;
+
+		s.merge();
+
+		for (int i : s.SA) {
+			cout << i << ' ';
+		}
+		cout << endl;
+
 		s.revertNormalizedCombinedStrings();
-		for (const int position : s.s12) {
+		for (const int position : s.SA) {
 			cout << char(s.combinedStrings[position]);
 			cout << char(s.combinedStrings[position + 1]);
 			cout << char(s.combinedStrings[position + 2]);

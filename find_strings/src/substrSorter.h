@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 class SubstrSorter
 {
@@ -23,10 +24,13 @@ private:
 	bool encodeS12();
 	bool equal(int a, int b);
 	char isWordEnd(int a);
-	void decodeS12();
-	void radixSortBasedOnS12(std::vector<int>& saToSort);
-	void merge(std::vector<int>& mergeString);
+	void radixSortBasedOnS12(std::vector<int>& saToSort, int offset);
+	void merge();
 	int compare(int a, int b);
+	int compareSingle(int a, int b);
+	void deepEncode(std::vector<int>& result);
+	bool isEncodedZero(int a);
+	bool isEncodedWordEnd(int a);
 
 	std::vector<int> combinedStrings;
 	std::vector<int> SA;
@@ -35,6 +39,8 @@ private:
 	std::vector<int> s0;
 	std::vector<int> s12;
 	std::vector<int> s12encoded;
+
+	std::unique_ptr<SubstrSorter> recursiveAlg;
 	
 	friend class Tester;
 };
