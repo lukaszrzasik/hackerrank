@@ -31,6 +31,8 @@ private:
 	void deepEncode(std::vector<int>& result);
 	bool isEncodedZero(int a);
 	bool isEncodedWordEnd(int a);
+	void removeZeroesAndDuplicatesFromSA();
+	void createLCP();
 
 	std::vector<int> combinedStrings;
 	std::vector<int> SA;

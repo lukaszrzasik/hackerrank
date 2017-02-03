@@ -142,7 +142,7 @@ bool SubstrSorter::equal(int a, int b)
 		return false;
 	}
 
-	if (combinedStrings[a] == 0) {
+	if (combinedStrings[a] < 1) {
 		return true;
 	}
 
@@ -150,7 +150,7 @@ bool SubstrSorter::equal(int a, int b)
 		return false;
 	}
 
-	if (combinedStrings[a + 1] == 0) {
+	if (combinedStrings[a + 1] < 1) {
 		return true;
 	}
 
@@ -434,7 +434,7 @@ int SubstrSorter::compareSingle(int a, int b)
 
 void SubstrSorter::deepEncode(std::vector<int>& result) {
 	int previousElement = SA[0];
-	unsigned int currentValue = isEncodedZero(SA[0]) ? 0 : 1;
+	unsigned int currentValue = combinedStrings[SA[0]] == 0 ? 0 : 1;
 	//std::cout << "previousElement = " << previousElement << std::endl;
 	//std::cout << "currentValue = " << currentValue << std::endl;
 	for (unsigned int i = 0; i < SA.size(); ++i) {
@@ -478,7 +478,7 @@ bool SubstrSorter::isEncodedWordEnd(int a)
 {
 	bool ret = false;
 	if (a % 3 == 0) {
-		ret = combinedStrings[a] < 1 || s12encoded[(a + 1) / 3];
+		ret = combinedStrings[a] < 1 || s12encoded[(a + 1) / 3] < 1;
 	} else if (a % 3 == 1) {
 		ret = s12encoded[a / 3] < 1;
 	} else {
@@ -486,6 +486,89 @@ bool SubstrSorter::isEncodedWordEnd(int a)
 	}
 	return ret;
 }
+
+void SubstrSorter::removeZeroesAndDuplicatesFromSA()
+{
+	auto saCopy = SA;
+	int previousElement = saCopy[0];
+	int currentPosition = 0;
+	for (unsigned int i = 0; i < saCopy.size(); ++i) {
+		if (combinedStrings[saCopy[i]] == 0) {
+			continue;
+		}
+		if (compare(saCopy[i], previousElement) == 0) {
+			continue;
+		}
+
+		SA[currentPosition++] = saCopy[i];
+		previousElement = saCopy[i];
+	}
+
+	SA.erase(SA.begin() + currentPosition, SA.end());
+	SA.shrink_to_fit();
+}
+
+void SubstrSorter::createLCP()
+{
+	bool isRecursive = true;
+	LCP.reserve(SA.size());
+	LCP.push_back(-1);
+
+	if (recursiveAlg.get() == nullptr) {
+		isRecursive = false;
+	}
+
+	for (unsigned int i = 1; i < SA.size(); ++i) {
+		int a = SA[i - 1];
+		int b = SA[i];
+
+		if (!isRecursive) {
+//			LCP[i] = getEqualNo(a, b);
+			continue;
+		}
+
+		bool a0 = a % 3 == 0;
+		bool a1 = a % 3 == 1;
+		bool a2 = a % 3 == 2;
+		bool b0 = b % 3 == 0;
+		bool b1 = b % 3 == 1;
+		bool b2 = b % 3 == 2;
+		
+		int encodedA = -1;
+		int encodedB = -1;
+
+		if (a1) {
+			encodedA = a / 3;
+		} else if (a2) {
+			encodedA = a / 3 + (s12encoded.size() + 1) / 2;
+		}
+
+		if (b1) {
+			encodedB = b / 3;
+		} else if (b2) {
+			encodedB = b / 3 + (s12encoded.size() + 1) / 2;
+		}
+
+		if (!a0 && !b0) {
+			int equalNo = 3 * recursiveAlg->LCP[s12encoded[encodedB]];
+//			LCP[i] = equalNo + getEqualNo(a + equalNo, b + equalNo);
+			continue;
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

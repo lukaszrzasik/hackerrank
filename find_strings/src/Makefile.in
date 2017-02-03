@@ -88,7 +88,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 noinst_PROGRAMS = trivialMain$(EXEEXT) generateInput$(EXEEXT) \
-	mainTest$(EXEEXT)
+	mainTest$(EXEEXT) cartesianTreeTest$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -105,6 +105,10 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
+libcartesiantree_a_AR = $(AR) $(ARFLAGS)
+libcartesiantree_a_LIBADD =
+am_libcartesiantree_a_OBJECTS = CartesianTree.$(OBJEXT)
+libcartesiantree_a_OBJECTS = $(am_libcartesiantree_a_OBJECTS)
 libstringer_a_AR = $(AR) $(ARFLAGS)
 libstringer_a_LIBADD =
 am_libstringer_a_OBJECTS = stringer.$(OBJEXT)
@@ -114,6 +118,9 @@ libsubstrsorter_a_LIBADD =
 am_libsubstrsorter_a_OBJECTS = substrSorter.$(OBJEXT)
 libsubstrsorter_a_OBJECTS = $(am_libsubstrsorter_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
+am_cartesianTreeTest_OBJECTS = cartesianTreeTest.$(OBJEXT)
+cartesianTreeTest_OBJECTS = $(am_cartesianTreeTest_OBJECTS)
+cartesianTreeTest_DEPENDENCIES = libcartesiantree.a
 am_generateInput_OBJECTS = generateInput.$(OBJEXT)
 generateInput_OBJECTS = $(am_generateInput_OBJECTS)
 generateInput_LDADD = $(LDADD)
@@ -152,10 +159,12 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+SOURCES = $(libcartesiantree_a_SOURCES) $(libstringer_a_SOURCES) \
+	$(libsubstrsorter_a_SOURCES) $(cartesianTreeTest_SOURCES) \
 	$(generateInput_SOURCES) $(mainTest_SOURCES) \
 	$(trivialMain_SOURCES)
-DIST_SOURCES = $(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+DIST_SOURCES = $(libcartesiantree_a_SOURCES) $(libstringer_a_SOURCES) \
+	$(libsubstrsorter_a_SOURCES) $(cartesianTreeTest_SOURCES) \
 	$(generateInput_SOURCES) $(mainTest_SOURCES) \
 	$(trivialMain_SOURCES)
 am__can_run_installinfo = \
@@ -279,9 +288,12 @@ trivialMain_SOURCES = trivialMain.cpp
 generateInput_SOURCES = generateInput.cpp
 mainTest_SOURCES = mainTest.cpp libsubstrsorter.a
 mainTest_LDADD = libsubstrsorter.a
-noinst_LIBRARIES = libstringer.a libsubstrsorter.a
+cartesianTreeTest_SOURCES = cartesianTreeTest.cpp libcartesiantree.a
+cartesianTreeTest_LDADD = libcartesiantree.a
+noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a
 libstringer_a_SOURCES = stringer.cpp
 libsubstrsorter_a_SOURCES = substrSorter.cpp
+libcartesiantree_a_SOURCES = CartesianTree.cpp
 all: all-am
 
 .SUFFIXES:
@@ -319,6 +331,11 @@ $(am__aclocal_m4_deps):
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
+libcartesiantree.a: $(libcartesiantree_a_OBJECTS) $(libcartesiantree_a_DEPENDENCIES) $(EXTRA_libcartesiantree_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libcartesiantree.a
+	$(AM_V_AR)$(libcartesiantree_a_AR) libcartesiantree.a $(libcartesiantree_a_OBJECTS) $(libcartesiantree_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libcartesiantree.a
+
 libstringer.a: $(libstringer_a_OBJECTS) $(libstringer_a_DEPENDENCIES) $(EXTRA_libstringer_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libstringer.a
 	$(AM_V_AR)$(libstringer_a_AR) libstringer.a $(libstringer_a_OBJECTS) $(libstringer_a_LIBADD)
@@ -331,6 +348,10 @@ libsubstrsorter.a: $(libsubstrsorter_a_OBJECTS) $(libsubstrsorter_a_DEPENDENCIES
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
+cartesianTreeTest$(EXEEXT): $(cartesianTreeTest_OBJECTS) $(cartesianTreeTest_DEPENDENCIES) $(EXTRA_cartesianTreeTest_DEPENDENCIES) 
+	@rm -f cartesianTreeTest$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(cartesianTreeTest_OBJECTS) $(cartesianTreeTest_LDADD) $(LIBS)
 
 generateInput$(EXEEXT): $(generateInput_OBJECTS) $(generateInput_DEPENDENCIES) $(EXTRA_generateInput_DEPENDENCIES) 
 	@rm -f generateInput$(EXEEXT)
@@ -350,6 +371,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CartesianTree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cartesianTreeTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generateInput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mainTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringer.Po@am__quote@
