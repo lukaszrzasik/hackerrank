@@ -6,11 +6,11 @@ using namespace std;
 
 int main()
 {
-	int n = 5;
-	int max_m =	10;
-	int q = 10;
+	int n = 50;
+	int max_m =	2000;
+	int q = 500;
 
-	int maxSize = 0; // max size of S
+	int maxSize = 1000000000; // max size of S
 
 	cout << n << endl;
 
@@ -28,7 +28,7 @@ int main()
 		{
 			char c = charDistribution(generator);
 			s.push_back(c);
-			maxSize += (1 + j + 1) / 2 * (j + 1); // arithmetic progression sum
+//			maxSize += (1 + j + 1) / 2 * (j + 1) / 100; // arithmetic progression sum
 		}	
 
 		cout << s << endl;

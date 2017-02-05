@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CartesianTree.hpp"
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -33,6 +35,10 @@ private:
 	bool isEncodedWordEnd(int a);
 	void removeZeroesAndDuplicatesFromSA();
 	void createLCP();
+	int getSimpleEqualNo(int a, int b, int n);
+	int getS12EncodedPosition(int a);
+	void calcSubstrLen();
+	int getSimpleLength(int a, int n);
 
 	std::vector<int> combinedStrings;
 	std::vector<int> SA;
@@ -43,6 +49,7 @@ private:
 	std::vector<int> s12encoded;
 
 	std::unique_ptr<SubstrSorter> recursiveAlg;
+	std::unique_ptr<CartesianTree> lcpTree;
 	
 	friend class Tester;
 };

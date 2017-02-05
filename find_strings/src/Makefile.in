@@ -88,7 +88,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 noinst_PROGRAMS = trivialMain$(EXEEXT) generateInput$(EXEEXT) \
-	mainTest$(EXEEXT) cartesianTreeTest$(EXEEXT)
+	mainTest$(EXEEXT) cartesianTreeTest$(EXEEXT) skewMain$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -114,7 +114,7 @@ libstringer_a_LIBADD =
 am_libstringer_a_OBJECTS = stringer.$(OBJEXT)
 libstringer_a_OBJECTS = $(am_libstringer_a_OBJECTS)
 libsubstrsorter_a_AR = $(AR) $(ARFLAGS)
-libsubstrsorter_a_LIBADD =
+libsubstrsorter_a_DEPENDENCIES = libcartesiantree.a
 am_libsubstrsorter_a_OBJECTS = substrSorter.$(OBJEXT)
 libsubstrsorter_a_OBJECTS = $(am_libsubstrsorter_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
@@ -126,7 +126,11 @@ generateInput_OBJECTS = $(am_generateInput_OBJECTS)
 generateInput_LDADD = $(LDADD)
 am_mainTest_OBJECTS = mainTest.$(OBJEXT)
 mainTest_OBJECTS = $(am_mainTest_OBJECTS)
-mainTest_DEPENDENCIES = libsubstrsorter.a
+mainTest_DEPENDENCIES = libsubstrsorter.a libcartesiantree.a
+am_skewMain_OBJECTS = skewMain.$(OBJEXT)
+skewMain_OBJECTS = $(am_skewMain_OBJECTS)
+skewMain_DEPENDENCIES = libstringer.a libsubstrsorter.a \
+	libcartesiantree.a
 am_trivialMain_OBJECTS = trivialMain.$(OBJEXT)
 trivialMain_OBJECTS = $(am_trivialMain_OBJECTS)
 trivialMain_LDADD = $(LDADD)
@@ -162,11 +166,11 @@ am__v_CXXLD_1 =
 SOURCES = $(libcartesiantree_a_SOURCES) $(libstringer_a_SOURCES) \
 	$(libsubstrsorter_a_SOURCES) $(cartesianTreeTest_SOURCES) \
 	$(generateInput_SOURCES) $(mainTest_SOURCES) \
-	$(trivialMain_SOURCES)
+	$(skewMain_SOURCES) $(trivialMain_SOURCES)
 DIST_SOURCES = $(libcartesiantree_a_SOURCES) $(libstringer_a_SOURCES) \
 	$(libsubstrsorter_a_SOURCES) $(cartesianTreeTest_SOURCES) \
 	$(generateInput_SOURCES) $(mainTest_SOURCES) \
-	$(trivialMain_SOURCES)
+	$(skewMain_SOURCES) $(trivialMain_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -284,16 +288,19 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-trivialMain_SOURCES = trivialMain.cpp
-generateInput_SOURCES = generateInput.cpp
-mainTest_SOURCES = mainTest.cpp libsubstrsorter.a
-mainTest_LDADD = libsubstrsorter.a
-cartesianTreeTest_SOURCES = cartesianTreeTest.cpp libcartesiantree.a
-cartesianTreeTest_LDADD = libcartesiantree.a
 noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a
 libstringer_a_SOURCES = stringer.cpp
 libsubstrsorter_a_SOURCES = substrSorter.cpp
+libsubstrsorter_a_LIBADD = libcartesiantree.a
 libcartesiantree_a_SOURCES = CartesianTree.cpp
+trivialMain_SOURCES = trivialMain.cpp
+generateInput_SOURCES = generateInput.cpp
+mainTest_SOURCES = mainTest.cpp libsubstrsorter.a
+mainTest_LDADD = libsubstrsorter.a libcartesiantree.a
+cartesianTreeTest_SOURCES = cartesianTreeTest.cpp
+cartesianTreeTest_LDADD = libcartesiantree.a
+skewMain_SOURCES = skewMain.cpp
+skewMain_LDADD = libstringer.a libsubstrsorter.a libcartesiantree.a
 all: all-am
 
 .SUFFIXES:
@@ -361,6 +368,10 @@ mainTest$(EXEEXT): $(mainTest_OBJECTS) $(mainTest_DEPENDENCIES) $(EXTRA_mainTest
 	@rm -f mainTest$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mainTest_OBJECTS) $(mainTest_LDADD) $(LIBS)
 
+skewMain$(EXEEXT): $(skewMain_OBJECTS) $(skewMain_DEPENDENCIES) $(EXTRA_skewMain_DEPENDENCIES) 
+	@rm -f skewMain$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(skewMain_OBJECTS) $(skewMain_LDADD) $(LIBS)
+
 trivialMain$(EXEEXT): $(trivialMain_OBJECTS) $(trivialMain_DEPENDENCIES) $(EXTRA_trivialMain_DEPENDENCIES) 
 	@rm -f trivialMain$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(trivialMain_OBJECTS) $(trivialMain_LDADD) $(LIBS)
@@ -375,6 +386,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cartesianTreeTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generateInput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mainTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skewMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substrSorter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trivialMain.Po@am__quote@

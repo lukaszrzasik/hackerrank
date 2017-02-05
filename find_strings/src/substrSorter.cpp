@@ -1,4 +1,4 @@
-#include "substrSorter.h"
+#include "substrSorter.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -10,16 +10,40 @@ namespace {
 
 void SubstrSorter::passAndSort(const std::vector<std::string>& strings)
 {
+	//std::cout << "passAndSort" << std::endl;
+	//std::cout << "combineStrings" << std::endl;
 	combineStrings(strings);
+	//std::cout << "normalizeCombinedStrings" << std::endl;
 	normalizeCombinedStrings();
+	//std::cout << "divideCombinedStrings" << std::endl;
 	divideCombinedStrings();
+	//std::cout << "radixSort" << std::endl;
 	radixSort(s12, engAlphSize, 3);
 
+	//std::cout << "encodeS12" << std::endl;
 	if (encodeS12()) {
+		//std::cout << "translateS12" << std::endl;
 		translateS12();
+		//std::cout << "radixSortBasedOnS12" << std::endl;
+		radixSortBasedOnS12(s12, 0);
 	}
 
+	//std::cout << "radixSortBasedOnS12" << std::endl;
+	radixSortBasedOnS12(s0, 1);
+	//std::cout << "radixSort" << std::endl;
+	radixSort(s0, engAlphSize, 1);
+	//std::cout << "merge" << std::endl;
+	merge();
+	//std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
+	removeZeroesAndDuplicatesFromSA();
+	//std::cout << "createLCP" << std::endl;
+	createLCP();
+	//std::cout << "calcSubstrLen" << std::endl;
+	calcSubstrLen();
+
+	//std::cout << "revertNormalizedCombinedStrings" << std::endl;
 	revertNormalizedCombinedStrings();
+	//std::cout << "passAndSort finished" << std::endl;
 }
 
 void SubstrSorter::combineStrings(const std::vector<std::string>& strings)
@@ -124,11 +148,7 @@ bool SubstrSorter::encodeS12()
 			needsSorting = true;
 		}
 
-		if (s12[i] % 3 == 1) {
-			s12encoded[s12[i] / 3] = wordEnd * currentValue;
-		} else {
-			s12encoded[s12[i] / 3 + (s12.size() + 1) / 2] = wordEnd * currentValue;
-		}
+		s12encoded[getS12EncodedPosition(s12[i])] = wordEnd * currentValue;
 
 		previousElement = s12[i];
 	}
@@ -171,27 +191,41 @@ char SubstrSorter::isWordEnd(int a)
 
 void SubstrSorter::translateS12()
 {
+	//std::cout << "translateS12 started" << std::endl;
 	recursiveAlg.reset(new SubstrSorter); 
 	recursiveAlg->combinedStrings = s12encoded;
-	if (recursiveAlg->combinedStrings[recursiveAlg->combinedStrings.size() - 1] != 0) {
-		recursiveAlg->combinedStrings.push_back(0);
-	}
 	recursiveAlg->combinedStrings.push_back(0); // add trailing zeroes
 	recursiveAlg->combinedStrings.push_back(0); // add trailing zeroes
+	//std::cout << "divideCombinedStrings" << std::endl;
 	recursiveAlg->divideCombinedStrings();
-	recursiveAlg->radixSort(recursiveAlg->s12, recursiveAlg->s12.size(), 3);
+	//std::cout << "radixSort" << std::endl;
+	recursiveAlg->radixSort(recursiveAlg->s12, recursiveAlg->combinedStrings.size(), 3);
 
-	if (encodeS12()) {
+	//std::cout << "encodeS12" << std::endl;
+	if (recursiveAlg->encodeS12()) {
+		//std::cout << "translateS12" << std::endl;
 		recursiveAlg->translateS12();
+		//std::cout << "radixSortBasedOnS12" << std::endl;
 		recursiveAlg->radixSortBasedOnS12(recursiveAlg->s12, 0);
 	}
 
+	//std::cout << "radixSortBasedOnS12" << std::endl;
 	recursiveAlg->radixSortBasedOnS12(recursiveAlg->s0, 1);
+	//std::cout << "radixSort" << std::endl;
 	recursiveAlg->radixSort(recursiveAlg->s0, recursiveAlg->combinedStrings.size(), 1);
 
+	//std::cout << "merge" << std::endl;
 	recursiveAlg->merge();
-
+	//std::cout << "deepEncode" << std::endl;
 	recursiveAlg->deepEncode(s12encoded);
+	//std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
+	recursiveAlg->removeZeroesAndDuplicatesFromSA();
+	//std::cout << "createLCP" << std::endl;
+	recursiveAlg->createLCP();
+	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
+	//std::cout << "calcSubstrLen" << std::endl;
+	recursiveAlg->calcSubstrLen();
+	//std::cout << "translateS12 finished" << std::endl;
 }
 
 void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
@@ -200,12 +234,7 @@ void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
 	// count items
 	std::vector<int> alphabetCounter(alphabetSize, 0);
 	for (const int i : saToSort) {
-		int basePos;
-		if ((i + offset) % 3 == 2) {
-			basePos = (i + offset) / 3 + (s12encoded.size() + 1) / 2;
-		} else {
-			basePos = (i + offset) / 3;
-		}
+		int basePos = getS12EncodedPosition(i + offset);
 		alphabetCounter[abs(s12encoded[basePos])]++;
 	}	
 	for (int i : alphabetCounter) {
@@ -227,12 +256,7 @@ void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
 	// sort
 	std::vector<int> saToSortCopy = saToSort;
 	for (unsigned int i = 0; i < saToSort.size(); ++i) {
-		int basePos;
-		if ((saToSortCopy[i] + offset) % 3 == 2) {
-			basePos = (saToSortCopy[i] + offset) / 3 + (s12encoded.size() + 1) / 2;
-		} else {
-			basePos = (saToSortCopy[i] + offset) / 3;
-		}
+		int basePos = getS12EncodedPosition(saToSortCopy[i] + offset);
 		saToSort[alphabetCounter[abs(s12encoded[basePos])]++] =
 			saToSortCopy[i];
 	}
@@ -286,133 +310,26 @@ void SubstrSorter::merge()
 
 int SubstrSorter::compare(int a, int b)
 {
-	bool a0 = a % 3 == 0;
-	bool a1 = a % 3 == 1;
-	bool a2 = a % 3 == 2;
-	bool b0 = b % 3 == 0;
-	bool b1 = b % 3 == 1;
-	bool b2 = b % 3 == 2;
+	//std::cout << "a = " << a << " b = " << b << std::endl;
+	int result;
+	int l = 0;
+	while ((a + l) % 3 == 0 || (b + l) % 3 == 0) {
+		++l;
+	}
+	//std::cout << "l = " << l << std::endl;
 
-	//std::cout << "a0 = " << a0 << ' ';
-	//std::cout << "a1 = " << a1 << ' ';
-	//std::cout << "a2 = " << a2 << ' ';
-	//std::cout << "b0 = " << b0 << ' ';
-	//std::cout << "b1 = " << b1 << ' ';
-	//std::cout << "b2 = " << b2 << ' ';
-	//std::cout << std::endl;
-
-	if (!a0 && !b0) {
-		int aEncoded = a1 ? s12encoded[a / 3] : s12encoded[a / 3 + (s12encoded.size() + 1) / 2];
-		int bEncoded = b1 ? s12encoded[b / 3] : s12encoded[b / 3 + (s12encoded.size() + 1) / 2];
-		return compareSingle(aEncoded, bEncoded);
+	for (int i = 0; i < l; ++i) {
+		result = compareSingle(combinedStrings[a + i], combinedStrings[b + i]);
+		//std::cout << "compareSingle result = " << result << std::endl;
+		if (result != 0 || combinedStrings[a + i] < 1) {
+			return result;
+		}
 	}
 
-	if (a0 && b0) {
-		int result = compareSingle(combinedStrings[a], combinedStrings[b]);
-		if (result != 0) {
-			return result;
-		} else if (combinedStrings[a] < 1) {
-			return 0;
-		}
-		int aEncoded = s12encoded[(a + 1) / 3];
-		int bEncoded = s12encoded[(b + 1) / 3];
-		result = compareSingle(aEncoded, bEncoded);
-		if (result != 0) {
-			return result;
-		} else if (aEncoded < 1) {
-			return 0;
-		}
-		return result;
-	}
-
-	if (a0 && b1) {
-		int result = compareSingle(combinedStrings[a], combinedStrings[b]);
-		if (result != 0) {
-			return result;
-		} else if (combinedStrings[a] < 1) {
-			return 0;
-		}
-		int aEncoded = s12encoded[(a + 1) / 3];
-		int bEncoded = s12encoded[(b + 1) / 3 + (s12encoded.size() + 1) / 2];
-		result = compareSingle(aEncoded, bEncoded);
-		if (result != 0) {
-			return result;
-		} else if (aEncoded < 1) {
-			return 0;
-		}
-		return result;
-	}
-
-	if (a0 && b2) {
-		//std::cout << "combineStrings[a] = " << combinedStrings[a] << std::endl;
-		//std::cout << "combineStrings[b] = " << combinedStrings[b] << std::endl;
-		int result = compareSingle(combinedStrings[a], combinedStrings[b]);
-		if (result != 0) {
-			return result;
-		} else if (combinedStrings[a] < 1) {
-			return 0;
-		}
-		result = compareSingle(combinedStrings[a + 1], combinedStrings[b + 1]);
-		if (result != 0) {
-			return result;
-		} else if (combinedStrings[a + 1] < 1) {
-			return 0;
-		}
-		int aEncoded = s12encoded[(a + 2) / 3 + (s12encoded.size() + 1) / 2];
-		int bEncoded = s12encoded[(b + 2) / 3];
-		result = compareSingle(aEncoded, bEncoded);
-		if (result != 0) {
-			return result;
-		} else if (aEncoded < 1) {
-			return 0;
-		}
-		return result;
-	}
-
-	if (a1 && b0) {
-		int result = compareSingle(combinedStrings[a], combinedStrings[b]);
-		if (result != 0) {
-			return result;
-		} else if (combinedStrings[a] < 1) {
-			return 0;
-		}
-		int aEncoded = s12encoded[(a + 1) / 3 + (s12encoded.size() + 1) / 2];
-		int bEncoded = s12encoded[(b + 1) / 3];
-		result = compareSingle(aEncoded, bEncoded);
-		if (result != 0) {
-			return result;
-		} else if (aEncoded < 1) {
-			return 0;
-		}
-		return result;
-	}
-
-	if (a2 && b0) {
-		int result = compareSingle(combinedStrings[a], combinedStrings[b]);
-		if (result != 0) {
-			return result;
-		} else if (combinedStrings[a] < 1) {
-			return 0;
-		}
-		result = compareSingle(combinedStrings[a + 1], combinedStrings[b + 1]);
-		if (result != 0) {
-			return result;
-		} else if (combinedStrings[a + 1] < 1) {
-			return 0;
-		}
-		int aEncoded = s12encoded[(a + 2) / 3];
-		int bEncoded = s12encoded[(b + 2) / 3 + (s12encoded.size() + 1) / 2];
-		result = compareSingle(aEncoded, bEncoded);
-		if (result != 0) {
-			return result;
-		} else if (aEncoded < 1) {
-			return 0;
-		}
-		return result;
-	}
-
-	// it should never be reached
-	return 0;
+	result = compareSingle(s12encoded[getS12EncodedPosition(a + l)],
+			               s12encoded[getS12EncodedPosition(b + l)]);
+	
+	return result;
 }
 
 int SubstrSorter::compareSingle(int a, int b)
@@ -440,7 +357,7 @@ void SubstrSorter::deepEncode(std::vector<int>& result) {
 	for (unsigned int i = 0; i < SA.size(); ++i) {
 		//std::cout << "i = " << i << std::endl;
 		//std::cout << "SA[i] = " << SA[i] << std::endl;
-		if (static_cast<unsigned>(abs(SA[i])) >= result.size()) {
+		if (static_cast<size_t>(abs(SA[i])) >= result.size()) {
 			continue;
 		}
 
@@ -450,8 +367,10 @@ void SubstrSorter::deepEncode(std::vector<int>& result) {
 			currentValue++;
 		}
 
+		int wordEnd = combinedStrings[SA[i]] < 1 ? -1 : 1;
+
 		//std::cout << "currentValue = " << currentValue << std::endl;
-		result[SA[i]] = currentValue;
+		result[SA[i]] = currentValue * wordEnd;
 		for (int j : result) {
 			//std::cout << j << ' ';
 		}
@@ -510,62 +429,178 @@ void SubstrSorter::removeZeroesAndDuplicatesFromSA()
 
 void SubstrSorter::createLCP()
 {
-	bool isRecursive = true;
-	LCP.reserve(SA.size());
-	LCP.push_back(-1);
+	LCP.resize(SA.size());
+	for (size_t i = 0; i < SA.size() - 1; ++i) {
+		//std::cout << "i = " << i << std::endl;
+		int a = SA[i];
+		int b = SA[i + 1];
+		int l = 0;
 
-	if (recursiveAlg.get() == nullptr) {
-		isRecursive = false;
-	}
-
-	for (unsigned int i = 1; i < SA.size(); ++i) {
-		int a = SA[i - 1];
-		int b = SA[i];
-
-		if (!isRecursive) {
-//			LCP[i] = getEqualNo(a, b);
-			continue;
+		while ((a + l) % 3 == 0 || (b + l) % 3 == 0) {
+			++l;
 		}
-
-		bool a0 = a % 3 == 0;
-		bool a1 = a % 3 == 1;
-		bool a2 = a % 3 == 2;
-		bool b0 = b % 3 == 0;
-		bool b1 = b % 3 == 1;
-		bool b2 = b % 3 == 2;
 		
-		int encodedA = -1;
-		int encodedB = -1;
+		int equalNo = getSimpleEqualNo(a, b, l);
+		//std::cout << "l = " << l << std::endl;
+		//std::cout << "equalNo after getSimpleEqualNo = " << equalNo << std::endl;
 
-		if (a1) {
-			encodedA = a / 3;
-		} else if (a2) {
-			encodedA = a / 3 + (s12encoded.size() + 1) / 2;
+		if (equalNo == l) {
+			if (recursiveAlg) {
+				int s12encodedPosA = getS12EncodedPosition(a + l);
+				int s12encodedPosB = getS12EncodedPosition(b + l);
+				//std::cout << "getS12EncodedPosition(a + l) = " << s12encodedPosA << std::endl;
+				//std::cout << "getS12EncodedPosition(b + l) = " << s12encodedPosB << std::endl;
+				int aa = abs(s12encoded[s12encodedPosA]);
+				int bb = abs(s12encoded[s12encodedPosB]);
+				int low = aa < bb ? aa : bb;
+				int high = aa < bb ? bb : aa;
+				//std::cout << "low = " << low << " high = " << high << std::endl;
+				int temp = recursiveAlg->lcpTree->rangeMinimaQuery(low - 1, high - 2);
+				//std::cout << "temp = " << temp << std::endl;
+				equalNo += 3 * recursiveAlg->LCP[temp];
+				//std::cout << "equalNo after rangeMinimaQuery = " << equalNo << std::endl;
+			}
+			
+			equalNo += getSimpleEqualNo(a + equalNo, b + equalNo, 3);
+			//std::cout << "equalNo after second getSimpleEqualNo = " << equalNo << std::endl;
 		}
 
-		if (b1) {
-			encodedB = b / 3;
-		} else if (b2) {
-			encodedB = b / 3 + (s12encoded.size() + 1) / 2;
-		}
-
-		if (!a0 && !b0) {
-			int equalNo = 3 * recursiveAlg->LCP[s12encoded[encodedB]];
-//			LCP[i] = equalNo + getEqualNo(a + equalNo, b + equalNo);
-			continue;
-		}
+		LCP[i] = equalNo;
 	}
 }
 
+int SubstrSorter::getSimpleEqualNo(int a, int b, int n)
+{
+	int result = 0;
+	for (int i = 0; i < n; ++i) {
+		if (combinedStrings[a + i] == 0 || combinedStrings[b + i] == 0) {
+			break;
+		}
 
+		if (abs(combinedStrings[a + i]) == abs(combinedStrings[b + i])) {
+			++result;
+		} else {
+			break;
+		}
 
+		if (combinedStrings[a + i] < 0 || combinedStrings[b + i] < 0) {
+			break;
+		}
+	}
 
+	return result;
+}
 
+int SubstrSorter::getS12EncodedPosition(int a)
+{
+	int result;
+	if (a % 3 == 0) {
+		std::cout << "SubstrSorter::getS12EncodedValue: error a = " << a << std::endl;
+		result = 0;
+	} else if (a % 3 == 1) {
+		result = a / 3;
+	} else {
+		result = a / 3 + (s12encoded.size() + 1) / 2;
+	}
 
+	return result;
+}
 
+void SubstrSorter::calcSubstrLen()
+{
+	substrLength.resize(SA.size());
+	for (size_t i = 0; i < SA.size(); ++i) {
+		//std::cout << "i = " << i << std::endl;
+		int a = SA[i];
+		int l = 0;
 
+		while ((a + l) % 3 == 0) {
+			++l;
+		}
+		//std::cout << "l = " << l << std::endl;
+		
+		int length = getSimpleLength(a, l);
+		//std::cout << "length after getSimpleLength = " << length << std::endl;
 
+		if (length == l && recursiveAlg) {
+			int s12encodedPosA = getS12EncodedPosition(a + l);
+			//std::cout << "getS12EncodedPosition(a + l) = " << s12encodedPosA << std::endl;
+			int aa = abs(s12encoded[s12encodedPosA]);
+			//std::cout << "aa = " << aa << std::endl;
+			length += 3 * recursiveAlg->substrLength[aa - 1];
+			//std::cout << "length after substrLength = " << length << std::endl;
+		}
 
+		length += getSimpleLength(a + length, 0);
+		//std::cout << "length after second getSimpleLength = " << length << std::endl;
+
+		substrLength[i] = length;
+	}
+}
+
+int SubstrSorter::getSimpleLength(int a, int n)
+{
+	int result = 0;
+	int i = a;
+	while (combinedStrings[i] > 0) {
+		if (n != 0 && result < n) {
+			break;
+		}
+		++result;
+		++i;
+	}
+	return result;
+}
+
+std::string SubstrSorter::getSubstr(int k) const
+{
+	//std::cout << "k = " << k << std::endl;
+	size_t substrPos = 0;
+	int lcp = 0;
+	int kp = 0;
+	for (int i : combinedStrings) {
+		//std::cout << static_cast<char>(i);
+	}
+	//std::cout << std::endl;
+
+	for (int i : SA) {
+		//std::cout << i << ' ';
+	}
+	//std::cout << std::endl;
+
+	for (int i : substrLength) {
+		//std::cout << i << ' ';
+	}
+	//std::cout << std::endl;
+
+	for (int i : LCP) {
+		//std::cout << i << ' ';
+	}
+	//std::cout << std::endl;
+
+	while (kp + substrLength[substrPos] - lcp < k && substrPos < SA.size()) {
+		kp += substrLength[substrPos] - lcp;
+		++substrPos;
+		lcp = LCP[substrPos - 1];
+		//std::cout << "substrPos = " << substrPos << std::endl;
+		//std::cout << "lcp = " << lcp << std::endl;
+		//std::cout << "kp = " << kp << std::endl;
+	}
+
+	if (substrPos >= SA.size()) {
+		return std::string("INVALID");
+	}
+
+	std::string result;
+	for (int i = 0; i < lcp; ++i) {
+		result.push_back(static_cast<char>(combinedStrings[SA[substrPos] + i]));
+	}
+	for (int i = 0; i < k - kp; ++i) {
+		result.push_back(static_cast<char>(combinedStrings[SA[substrPos] + lcp + i]));
+	}
+
+	return result;
+}
 
 
 

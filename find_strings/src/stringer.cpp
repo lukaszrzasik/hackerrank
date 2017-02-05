@@ -1,4 +1,4 @@
-#include "stringer.h"
+#include "stringer.hpp"
 
 std::string Stringer::operator[] (unsigned int query) const
 {

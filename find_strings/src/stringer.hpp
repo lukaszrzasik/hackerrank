@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "istringer.h"
-#include "substrSorter.h"
+#include "istringer.hpp"
+#include "substrSorter.hpp"
 
 class Stringer : public IStringer
 {
