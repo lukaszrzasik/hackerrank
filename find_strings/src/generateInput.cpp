@@ -21,11 +21,12 @@ int main()
 
     for (int i = 0; i < n; ++i) 
 	{
-		int stringSize = stringSizeDistribution(generator);
+		int stringSize = max_m; //stringSizeDistribution(generator);
 	    string s;
 		
 	    for (int j = 0; j < stringSize; ++j)
 		{
+//			int character = j % 26;
 			char c = charDistribution(generator);
 			s.push_back(c);
 //			maxSize += (1 + j + 1) / 2 * (j + 1) / 100; // arithmetic progression sum

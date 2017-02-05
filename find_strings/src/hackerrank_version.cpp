@@ -1,7 +1,215 @@
-#include "substrSorter.hpp"
-
-#include <iostream>
+#include <map>
+#include <set>
+#include <list>
 #include <cmath>
+#include <ctime>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <cstdio>
+#include <limits>
+#include <vector>
+#include <cstdlib>
+#include <numeric>
+#include <sstream>
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <memory>
+
+using namespace std;
+
+class IStringer
+{
+public:
+	virtual std::string operator[] (const unsigned int query) const = 0;
+	virtual void addString(const std::string& w) = 0;
+	virtual void clearStrings() = 0;
+};
+
+class CartesianTree
+{
+public:
+	CartesianTree() = delete;
+	CartesianTree(const CartesianTree&) = delete;
+	CartesianTree(CartesianTree&&) = delete;
+
+	CartesianTree(const std::vector<int>& v);
+
+	int rangeMinimaQuery(int l, int h);
+
+private:
+	class CartesianTreeNode
+	{
+	public:
+		typedef std::shared_ptr<CartesianTreeNode> CartesianTreeNodePtr;
+
+		CartesianTreeNode() = delete;
+		CartesianTreeNode(const CartesianTreeNode&) = delete;
+		CartesianTreeNode(CartesianTreeNode&&) = delete;
+
+		CartesianTreeNode(int v);
+
+		int rangeMinimaQuery(int l, int h);
+
+		int getValue();
+		void setLeft(CartesianTreeNodePtr&& l);
+		void setRight(CartesianTreeNodePtr&& r);
+		CartesianTreeNodePtr getLeft();
+		CartesianTreeNodePtr getRight();
+
+	private:
+		int value;
+		CartesianTreeNodePtr left;
+		CartesianTreeNodePtr right;
+	};
+
+	typedef CartesianTreeNode::CartesianTreeNodePtr CartesianTreeNodePtr;
+
+	CartesianTreeNodePtr root;
+
+	friend class CartesianTreeTester;
+};
+
+CartesianTree::CartesianTree(const std::vector<int>& v)
+{
+	if (v.empty()) {
+		std::cout << "CartesianTree constructor error: empty vector provided" << std::endl;
+		return;
+	}
+
+	std::stack<CartesianTreeNodePtr> s;
+	root.reset(new CartesianTreeNode(0));
+	s.push(root);
+
+	for (unsigned int index = 1; index < v.size(); ++index) {
+		CartesianTreeNodePtr lastPopped;
+		CartesianTreeNodePtr current;
+		while (!s.empty() && v[index] < v[s.top()->getValue()]) {
+			lastPopped = s.top();
+			s.pop();
+		}
+		
+		if (s.empty()) {
+			root.reset(new CartesianTreeNode(index));
+			root->setLeft(std::move(lastPopped));
+			s.push(root);
+		} else {
+			s.top()->setRight(CartesianTreeNodePtr(new CartesianTreeNode(index)));
+			s.top()->getRight()->setLeft(std::move(lastPopped));
+			s.push(s.top()->getRight());
+		}
+	}
+}
+
+int CartesianTree::rangeMinimaQuery(int l, int h)
+{
+	if (!root) {
+		return -1;
+	}
+	return root->rangeMinimaQuery(l, h);
+}
+
+int CartesianTree::CartesianTreeNode::rangeMinimaQuery(int l, int h)
+{
+	int ret;
+
+	if (getValue() > h) {
+		if (!left) {
+			ret = -1;
+		} else {
+			ret = left->rangeMinimaQuery(l, h);
+		}
+	} else if (getValue() < l) {
+		if (!right) {
+			ret = -1;
+		} else {
+			ret = right->rangeMinimaQuery(l, h);
+		}
+	} else {
+		ret = getValue();
+	}
+
+	return ret;
+}
+
+CartesianTree::CartesianTreeNode::CartesianTreeNode(int v) : value(v)
+{
+}
+
+int CartesianTree::CartesianTreeNode::getValue()
+{
+	return value;
+}
+
+void CartesianTree::CartesianTreeNode::setLeft(CartesianTreeNodePtr&& l)
+{
+	left = l;
+}
+
+void CartesianTree::CartesianTreeNode::setRight(CartesianTreeNodePtr&& r)
+{
+	right = r;
+}
+
+CartesianTree::CartesianTreeNodePtr CartesianTree::CartesianTreeNode::getLeft()
+{
+	return left;
+}
+
+CartesianTree::CartesianTreeNodePtr CartesianTree::CartesianTreeNode::getRight()
+{
+	return right;
+}
+
+class SubstrSorter
+{
+public:
+	void passAndSort(const std::vector<std::string>& strings);
+	std::string getSubstr(int k) const;
+
+private:
+	void translateS12();
+	void sort();
+	int getSA(int k);
+	int getLCP(int k);
+	int getSubstrLength(int k);
+	void combineStrings(const std::vector<std::string>& strings);
+	void normalizeCombinedStrings();
+	void revertNormalizedCombinedStrings();
+	void divideCombinedStrings();
+	void radixSort(std::vector<int>& saToSort, int alphabetSize, int size);
+	bool encodeS12();
+	bool equal(int a, int b);
+	char isWordEnd(int a);
+	void radixSortBasedOnS12(std::vector<int>& saToSort, int offset);
+	void merge();
+	int compare(int a, int b);
+	int compareSingle(int a, int b);
+	void deepEncode(std::vector<int>& result);
+	bool isEncodedZero(int a);
+	bool isEncodedWordEnd(int a);
+	void removeZeroesAndDuplicatesFromSA();
+	void createLCP();
+	int getSimpleEqualNo(int a, int b, int n);
+	int getS12EncodedPosition(int a);
+	void calcSubstrLen();
+	int getSimpleLength(int a, int n);
+
+	std::vector<int> combinedStrings;
+	std::vector<int> SA;
+	std::vector<int> LCP;
+	std::vector<int> substrLength;
+	std::vector<int> s0;
+	std::vector<int> s12;
+	std::vector<int> s12encoded;
+
+	std::unique_ptr<SubstrSorter> recursiveAlg;
+	std::unique_ptr<CartesianTree> lcpTree;
+	
+	friend class Tester;
+};
 
 namespace {
 	const char a = 97 - 1; // 'a' ASCII code minus one (word seperator)
@@ -10,40 +218,40 @@ namespace {
 
 void SubstrSorter::passAndSort(const std::vector<std::string>& strings)
 {
-	std::cout << "passAndSort" << std::endl;
-	std::cout << "combineStrings" << std::endl;
+	//std::cout << "passAndSort" << std::endl;
+	//std::cout << "combineStrings" << std::endl;
 	combineStrings(strings);
-	std::cout << "normalizeCombinedStrings" << std::endl;
+	//std::cout << "normalizeCombinedStrings" << std::endl;
 	normalizeCombinedStrings();
-	std::cout << "divideCombinedStrings" << std::endl;
+	//std::cout << "divideCombinedStrings" << std::endl;
 	divideCombinedStrings();
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	radixSort(s12, engAlphSize, 3);
 
-	std::cout << "encodeS12" << std::endl;
+	//std::cout << "encodeS12" << std::endl;
 	if (encodeS12()) {
-		std::cout << "translateS12" << std::endl;
+		//std::cout << "translateS12" << std::endl;
 		translateS12();
-		std::cout << "radixSortBasedOnS12" << std::endl;
+		//std::cout << "radixSortBasedOnS12" << std::endl;
 		radixSortBasedOnS12(s12, 0);
 	}
 
-	std::cout << "radixSortBasedOnS12" << std::endl;
+	//std::cout << "radixSortBasedOnS12" << std::endl;
 	radixSortBasedOnS12(s0, 1);
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	radixSort(s0, engAlphSize, 1);
-	std::cout << "merge" << std::endl;
+	//std::cout << "merge" << std::endl;
 	merge();
-	std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
+	//std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
 	removeZeroesAndDuplicatesFromSA();
-	std::cout << "createLCP" << std::endl;
+	//std::cout << "createLCP" << std::endl;
 	createLCP();
-	std::cout << "calcSubstrLen" << std::endl;
+	//std::cout << "calcSubstrLen" << std::endl;
 	calcSubstrLen();
 
-	std::cout << "revertNormalizedCombinedStrings" << std::endl;
+	//std::cout << "revertNormalizedCombinedStrings" << std::endl;
 	revertNormalizedCombinedStrings();
-	std::cout << "passAndSort finished" << std::endl;
+	//std::cout << "passAndSort finished" << std::endl;
 }
 
 void SubstrSorter::combineStrings(const std::vector<std::string>& strings)
@@ -191,41 +399,41 @@ char SubstrSorter::isWordEnd(int a)
 
 void SubstrSorter::translateS12()
 {
-	std::cout << "translateS12 started" << std::endl;
+	//std::cout << "translateS12 started" << std::endl;
 	recursiveAlg.reset(new SubstrSorter); 
 	recursiveAlg->combinedStrings = s12encoded;
 	recursiveAlg->combinedStrings.push_back(0); // add trailing zeroes
 	recursiveAlg->combinedStrings.push_back(0); // add trailing zeroes
-	std::cout << "divideCombinedStrings" << std::endl;
+	//std::cout << "divideCombinedStrings" << std::endl;
 	recursiveAlg->divideCombinedStrings();
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	recursiveAlg->radixSort(recursiveAlg->s12, recursiveAlg->combinedStrings.size(), 3);
 
-	std::cout << "encodeS12" << std::endl;
+	//std::cout << "encodeS12" << std::endl;
 	if (recursiveAlg->encodeS12()) {
-		std::cout << "translateS12" << std::endl;
+		//std::cout << "translateS12" << std::endl;
 		recursiveAlg->translateS12();
-		std::cout << "radixSortBasedOnS12" << std::endl;
+		//std::cout << "radixSortBasedOnS12" << std::endl;
 		recursiveAlg->radixSortBasedOnS12(recursiveAlg->s12, 0);
 	}
 
-	std::cout << "radixSortBasedOnS12" << std::endl;
+	//std::cout << "radixSortBasedOnS12" << std::endl;
 	recursiveAlg->radixSortBasedOnS12(recursiveAlg->s0, 1);
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	recursiveAlg->radixSort(recursiveAlg->s0, recursiveAlg->combinedStrings.size(), 1);
 
-	std::cout << "merge" << std::endl;
+	//std::cout << "merge" << std::endl;
 	recursiveAlg->merge();
-	std::cout << "deepEncode" << std::endl;
+	//std::cout << "deepEncode" << std::endl;
 	recursiveAlg->deepEncode(s12encoded);
-	std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
+	//std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
 	recursiveAlg->removeZeroesAndDuplicatesFromSA();
-	std::cout << "createLCP" << std::endl;
+	//std::cout << "createLCP" << std::endl;
 	recursiveAlg->createLCP();
 	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
-	std::cout << "calcSubstrLen" << std::endl;
+	//std::cout << "calcSubstrLen" << std::endl;
 	recursiveAlg->calcSubstrLen();
-	std::cout << "translateS12 finished" << std::endl;
+	//std::cout << "translateS12 finished" << std::endl;
 }
 
 void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
@@ -602,11 +810,72 @@ std::string SubstrSorter::getSubstr(int k) const
 	return result;
 }
 
+class Stringer : public IStringer
+{
+public:
+	virtual std::string operator[] (const unsigned int query) const;
+	virtual void addString(const std::string& w);
+	virtual void clearStrings();
 
+private:
+	std::vector<std::string> strings;
+	mutable SubstrSorter sorter;
+	mutable bool invalidated = true;
+};
 
+std::string Stringer::operator[] (unsigned int query) const
+{
+	if (invalidated) {
+		sorter.passAndSort(strings);
+		invalidated = false;
+	}
+	return sorter.getSubstr(query);
+}
 
+void Stringer::addString(const std::string& w)
+{
+	strings.push_back(w);
+	invalidated = true;
+}
 
+void Stringer::clearStrings()
+{
+	strings.clear();
+	invalidated = true;
+}
 
+/* Head ends here */
+void findStrings (vector<string> a, vector<int> a_query) {
+	Stringer stringer;
 
+	for (const string& s : a) {
+		stringer.addString(s);
+	}
 
+	for (const int& k : a_query) {
+		cout << stringer[k] << endl;
+	}
+}
 
+/* Tail starts here */
+int main() {
+    int res;
+    
+    int _cases,_query, _a_i;
+    scanf("%d", &_cases);
+    vector <string> _a;
+    char _a_item[2001];
+    for (_a_i = 0; _a_i<_cases; _a_i++) {
+        scanf("%s",_a_item);
+        _a.push_back(_a_item);
+    }
+    vector <int> _a_query;
+    scanf("%d", &_query);
+    int _q_item;
+    for(_a_i = 0; _a_i < _query; _a_i++) { 
+        scanf("%d", &_q_item);
+        _a_query.push_back(_q_item);
+    }
+    findStrings(_a, _a_query);    
+    return 0;
+}
