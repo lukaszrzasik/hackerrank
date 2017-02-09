@@ -89,7 +89,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 noinst_PROGRAMS = trivialMain$(EXEEXT) generateInput$(EXEEXT) \
 	mainTest$(EXEEXT) cartesianTreeTest$(EXEEXT) skewMain$(EXEEXT) \
-	hackerrank_version$(EXEEXT)
+	hackerrank_version$(EXEEXT) rmqTest$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -110,6 +110,10 @@ libcartesiantree_a_AR = $(AR) $(ARFLAGS)
 libcartesiantree_a_LIBADD =
 am_libcartesiantree_a_OBJECTS = CartesianTree.$(OBJEXT)
 libcartesiantree_a_OBJECTS = $(am_libcartesiantree_a_OBJECTS)
+librmq_a_AR = $(AR) $(ARFLAGS)
+librmq_a_LIBADD =
+am_librmq_a_OBJECTS = RMQ.$(OBJEXT)
+librmq_a_OBJECTS = $(am_librmq_a_OBJECTS)
 libstringer_a_AR = $(AR) $(ARFLAGS)
 libstringer_a_LIBADD =
 am_libstringer_a_OBJECTS = stringer.$(OBJEXT)
@@ -131,6 +135,9 @@ hackerrank_version_LDADD = $(LDADD)
 am_mainTest_OBJECTS = mainTest.$(OBJEXT)
 mainTest_OBJECTS = $(am_mainTest_OBJECTS)
 mainTest_DEPENDENCIES = libsubstrsorter.a libcartesiantree.a
+am_rmqTest_OBJECTS = RmqTester.$(OBJEXT)
+rmqTest_OBJECTS = $(am_rmqTest_OBJECTS)
+rmqTest_DEPENDENCIES = librmq.a
 am_skewMain_OBJECTS = skewMain.$(OBJEXT)
 skewMain_OBJECTS = $(am_skewMain_OBJECTS)
 skewMain_DEPENDENCIES = libstringer.a libsubstrsorter.a \
@@ -167,14 +174,16 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(libcartesiantree_a_SOURCES) $(libstringer_a_SOURCES) \
-	$(libsubstrsorter_a_SOURCES) $(cartesianTreeTest_SOURCES) \
-	$(generateInput_SOURCES) $(hackerrank_version_SOURCES) \
-	$(mainTest_SOURCES) $(skewMain_SOURCES) $(trivialMain_SOURCES)
-DIST_SOURCES = $(libcartesiantree_a_SOURCES) $(libstringer_a_SOURCES) \
-	$(libsubstrsorter_a_SOURCES) $(cartesianTreeTest_SOURCES) \
-	$(generateInput_SOURCES) $(hackerrank_version_SOURCES) \
-	$(mainTest_SOURCES) $(skewMain_SOURCES) $(trivialMain_SOURCES)
+SOURCES = $(libcartesiantree_a_SOURCES) $(librmq_a_SOURCES) \
+	$(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(cartesianTreeTest_SOURCES) $(generateInput_SOURCES) \
+	$(hackerrank_version_SOURCES) $(mainTest_SOURCES) \
+	$(rmqTest_SOURCES) $(skewMain_SOURCES) $(trivialMain_SOURCES)
+DIST_SOURCES = $(libcartesiantree_a_SOURCES) $(librmq_a_SOURCES) \
+	$(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(cartesianTreeTest_SOURCES) $(generateInput_SOURCES) \
+	$(hackerrank_version_SOURCES) $(mainTest_SOURCES) \
+	$(rmqTest_SOURCES) $(skewMain_SOURCES) $(trivialMain_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -213,7 +222,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
-CXX = @CXX@
+CXX = clang++
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -292,11 +301,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a
+noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a librmq.a
 libstringer_a_SOURCES = stringer.cpp
 libsubstrsorter_a_SOURCES = substrSorter.cpp
 libsubstrsorter_a_LIBADD = libcartesiantree.a
 libcartesiantree_a_SOURCES = CartesianTree.cpp
+librmq_a_SOURCES = RMQ.cpp
 trivialMain_SOURCES = trivialMain.cpp
 generateInput_SOURCES = generateInput.cpp
 mainTest_SOURCES = mainTest.cpp libsubstrsorter.a
@@ -306,6 +316,9 @@ cartesianTreeTest_LDADD = libcartesiantree.a
 skewMain_SOURCES = skewMain.cpp
 skewMain_LDADD = libstringer.a libsubstrsorter.a libcartesiantree.a
 hackerrank_version_SOURCES = hackerrank_version.cpp
+rmqTest_SOURCES = RmqTester.cpp
+rmqTest_LDADD = librmq.a
+AM_CXXFLAGS = -std=c++14
 all: all-am
 
 .SUFFIXES:
@@ -348,6 +361,11 @@ libcartesiantree.a: $(libcartesiantree_a_OBJECTS) $(libcartesiantree_a_DEPENDENC
 	$(AM_V_AR)$(libcartesiantree_a_AR) libcartesiantree.a $(libcartesiantree_a_OBJECTS) $(libcartesiantree_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libcartesiantree.a
 
+librmq.a: $(librmq_a_OBJECTS) $(librmq_a_DEPENDENCIES) $(EXTRA_librmq_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f librmq.a
+	$(AM_V_AR)$(librmq_a_AR) librmq.a $(librmq_a_OBJECTS) $(librmq_a_LIBADD)
+	$(AM_V_at)$(RANLIB) librmq.a
+
 libstringer.a: $(libstringer_a_OBJECTS) $(libstringer_a_DEPENDENCIES) $(EXTRA_libstringer_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libstringer.a
 	$(AM_V_AR)$(libstringer_a_AR) libstringer.a $(libstringer_a_OBJECTS) $(libstringer_a_LIBADD)
@@ -377,6 +395,10 @@ mainTest$(EXEEXT): $(mainTest_OBJECTS) $(mainTest_DEPENDENCIES) $(EXTRA_mainTest
 	@rm -f mainTest$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mainTest_OBJECTS) $(mainTest_LDADD) $(LIBS)
 
+rmqTest$(EXEEXT): $(rmqTest_OBJECTS) $(rmqTest_DEPENDENCIES) $(EXTRA_rmqTest_DEPENDENCIES) 
+	@rm -f rmqTest$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(rmqTest_OBJECTS) $(rmqTest_LDADD) $(LIBS)
+
 skewMain$(EXEEXT): $(skewMain_OBJECTS) $(skewMain_DEPENDENCIES) $(EXTRA_skewMain_DEPENDENCIES) 
 	@rm -f skewMain$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(skewMain_OBJECTS) $(skewMain_LDADD) $(LIBS)
@@ -392,6 +414,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CartesianTree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RMQ.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RmqTester.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cartesianTreeTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generateInput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hackerrank_version.Po@am__quote@

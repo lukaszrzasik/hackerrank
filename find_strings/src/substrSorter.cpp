@@ -10,40 +10,40 @@ namespace {
 
 void SubstrSorter::passAndSort(const std::vector<std::string>& strings)
 {
-	std::cout << "passAndSort" << std::endl;
-	std::cout << "combineStrings" << std::endl;
+	//std::cout << "passAndSort" << std::endl;
+	//std::cout << "combineStrings" << std::endl;
 	combineStrings(strings);
-	std::cout << "normalizeCombinedStrings" << std::endl;
+	//std::cout << "normalizeCombinedStrings" << std::endl;
 	normalizeCombinedStrings();
-	std::cout << "divideCombinedStrings" << std::endl;
+	//std::cout << "divideCombinedStrings" << std::endl;
 	divideCombinedStrings();
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	radixSort(s12, engAlphSize, 3);
 
-	std::cout << "encodeS12" << std::endl;
+	//std::cout << "encodeS12" << std::endl;
 	if (encodeS12()) {
-		std::cout << "translateS12" << std::endl;
+		//std::cout << "translateS12" << std::endl;
 		translateS12();
-		std::cout << "radixSortBasedOnS12" << std::endl;
+		//std::cout << "radixSortBasedOnS12" << std::endl;
 		radixSortBasedOnS12(s12, 0);
 	}
 
-	std::cout << "radixSortBasedOnS12" << std::endl;
+	//std::cout << "radixSortBasedOnS12" << std::endl;
 	radixSortBasedOnS12(s0, 1);
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	radixSort(s0, engAlphSize, 1);
-	std::cout << "merge" << std::endl;
+	//std::cout << "merge" << std::endl;
 	merge();
-	std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
+	//std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
 	removeZeroesAndDuplicatesFromSA();
-	std::cout << "createLCP" << std::endl;
+	//std::cout << "createLCP" << std::endl;
 	createLCP();
-	std::cout << "calcSubstrLen" << std::endl;
+	//std::cout << "calcSubstrLen" << std::endl;
 	calcSubstrLen();
 
-	std::cout << "revertNormalizedCombinedStrings" << std::endl;
+	//std::cout << "revertNormalizedCombinedStrings" << std::endl;
 	revertNormalizedCombinedStrings();
-	std::cout << "passAndSort finished" << std::endl;
+	//std::cout << "passAndSort finished" << std::endl;
 }
 
 void SubstrSorter::combineStrings(const std::vector<std::string>& strings)
@@ -191,41 +191,41 @@ char SubstrSorter::isWordEnd(int a)
 
 void SubstrSorter::translateS12()
 {
-	std::cout << "translateS12 started" << std::endl;
+	//std::cout << "translateS12 started" << std::endl;
 	recursiveAlg.reset(new SubstrSorter); 
 	recursiveAlg->combinedStrings = s12encoded;
 	recursiveAlg->combinedStrings.push_back(0); // add trailing zeroes
 	recursiveAlg->combinedStrings.push_back(0); // add trailing zeroes
-	std::cout << "divideCombinedStrings" << std::endl;
+	//std::cout << "divideCombinedStrings" << std::endl;
 	recursiveAlg->divideCombinedStrings();
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	recursiveAlg->radixSort(recursiveAlg->s12, recursiveAlg->combinedStrings.size(), 3);
 
-	std::cout << "encodeS12" << std::endl;
+	//std::cout << "encodeS12" << std::endl;
 	if (recursiveAlg->encodeS12()) {
-		std::cout << "translateS12" << std::endl;
+		//std::cout << "translateS12" << std::endl;
 		recursiveAlg->translateS12();
-		std::cout << "radixSortBasedOnS12" << std::endl;
+		//std::cout << "radixSortBasedOnS12" << std::endl;
 		recursiveAlg->radixSortBasedOnS12(recursiveAlg->s12, 0);
 	}
 
-	std::cout << "radixSortBasedOnS12" << std::endl;
+	//std::cout << "radixSortBasedOnS12" << std::endl;
 	recursiveAlg->radixSortBasedOnS12(recursiveAlg->s0, 1);
-	std::cout << "radixSort" << std::endl;
+	//std::cout << "radixSort" << std::endl;
 	recursiveAlg->radixSort(recursiveAlg->s0, recursiveAlg->combinedStrings.size(), 1);
 
-	std::cout << "merge" << std::endl;
+	//std::cout << "merge" << std::endl;
 	recursiveAlg->merge();
-	std::cout << "deepEncode" << std::endl;
+	//std::cout << "deepEncode" << std::endl;
 	recursiveAlg->deepEncode(s12encoded);
-	std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
+	//std::cout << "removeZeroesAndDuplicatesFromSA" << std::endl;
 	recursiveAlg->removeZeroesAndDuplicatesFromSA();
-	std::cout << "createLCP" << std::endl;
+	//std::cout << "createLCP" << std::endl;
 	recursiveAlg->createLCP();
 	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
-	std::cout << "calcSubstrLen" << std::endl;
+	//std::cout << "calcSubstrLen" << std::endl;
 	recursiveAlg->calcSubstrLen();
-	std::cout << "translateS12 finished" << std::endl;
+	//std::cout << "translateS12 finished" << std::endl;
 }
 
 void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
