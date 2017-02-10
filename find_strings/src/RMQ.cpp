@@ -43,12 +43,15 @@ void RMQ::createSparseTable()
 		sparseTable[n - i - 1][0] = n - i - 1;
 	}
 
-/*	std::cout << "Create sparse table" << std::endl;
+	std::cout << "Create sparse table" << std::endl;
 	for (std::size_t j = 1; j < sparseTable[0].size(); ++j) {
 		for (std::size_t i = 0; i < sparseTable.size(); ++i) {
-			if (i + (1 << (j - 1)) >= sparseTable.size()) {
+			if (i + (1 << (j - 1)) >= sparseTable.size()
+				|| j - 1 >= sparseTable[i + (1 << (j - 1))].size()) {
+				std::cout << "break" << std::endl;
 				break;
 			}
+			std::cout << "i = " << i << " j = " << j << std::endl;
 			if (array[sparseTable[i][j - 1]] < array[sparseTable[i + (1 << (j - 1))][j - 1]]) {
 				sparseTable[i][j] = sparseTable[i][j - 1];
 			} else {
@@ -56,5 +59,4 @@ void RMQ::createSparseTable()
 			}
 		}
 	}
-*/
 }
