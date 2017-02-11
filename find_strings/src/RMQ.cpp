@@ -12,19 +12,19 @@ RMQ::RMQ(const std::vector<int>& a) : array(a)
 {
 	n = array.size();
 	if (n == 0) {
-		//std::cout << "RMQ ctor error: array is empty" << std::endl;
+		std::cout << "RMQ ctor error: array is empty" << std::endl;
 		return;
 	}
 	b = static_cast<std::size_t>(log2(n)) / 4;
 	b = b == 0 ? 1 : b;
 
-	//std::cout << "calcBlockMinima" << std::endl;
+	std::cout << "calcBlockMinima" << std::endl;
 	calcBlockMinima();
-	//std::cout << "createSparseTable" << std::endl;
+	std::cout << "createSparseTable" << std::endl;
 	createSparseTable();
-	//std::cout << "createFullTables" << std::endl;
+	std::cout << "createFullTables" << std::endl;
 	createFullTables();
-	//std::cout << "createFullTables end" << std::endl;
+	std::cout << "createFullTables end" << std::endl;
 }
 
 void RMQ::calcBlockMinima()
@@ -135,7 +135,7 @@ void RMQ::createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std:
 
 std::size_t RMQ::operator()(std::size_t low, std::size_t high)
 {
-	//std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
+//	std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
 	if (low > high) {
 		//std::cout << "RMQ::operator() error: low is greater than high" << std::endl;
 		return 0;

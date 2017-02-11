@@ -89,7 +89,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 noinst_PROGRAMS = trivialMain$(EXEEXT) generateInput$(EXEEXT) \
 	mainTest$(EXEEXT) cartesianTreeTest$(EXEEXT) skewMain$(EXEEXT) \
-	hackerrank_version$(EXEEXT) rmqTest$(EXEEXT)
+	hackerrank_version$(EXEEXT) rmqTest$(EXEEXT) \
+	skewCartesianMain$(EXEEXT)
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -122,6 +123,12 @@ libsubstrsorter_a_AR = $(AR) $(ARFLAGS)
 libsubstrsorter_a_DEPENDENCIES = librmq.a
 am_libsubstrsorter_a_OBJECTS = substrSorter.$(OBJEXT)
 libsubstrsorter_a_OBJECTS = $(am_libsubstrsorter_a_OBJECTS)
+libsubstrsortercartesian_a_AR = $(AR) $(ARFLAGS)
+libsubstrsortercartesian_a_DEPENDENCIES = libcartesiantree.a
+am_libsubstrsortercartesian_a_OBJECTS =  \
+	substrSorterCartesian.$(OBJEXT)
+libsubstrsortercartesian_a_OBJECTS =  \
+	$(am_libsubstrsortercartesian_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_cartesianTreeTest_OBJECTS = cartesianTreeTest.$(OBJEXT)
 cartesianTreeTest_OBJECTS = $(am_cartesianTreeTest_OBJECTS)
@@ -138,6 +145,10 @@ mainTest_DEPENDENCIES = libsubstrsorter.a librmq.a
 am_rmqTest_OBJECTS = RmqTester.$(OBJEXT)
 rmqTest_OBJECTS = $(am_rmqTest_OBJECTS)
 rmqTest_DEPENDENCIES = librmq.a
+am_skewCartesianMain_OBJECTS = skewCartesianMain.$(OBJEXT)
+skewCartesianMain_OBJECTS = $(am_skewCartesianMain_OBJECTS)
+skewCartesianMain_DEPENDENCIES = libstringer.a \
+	libsubstrsortercartesian.a libcartesiantree.a
 am_skewMain_OBJECTS = skewMain.$(OBJEXT)
 skewMain_OBJECTS = $(am_skewMain_OBJECTS)
 skewMain_DEPENDENCIES = libstringer.a libsubstrsorter.a librmq.a
@@ -175,14 +186,18 @@ am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libcartesiantree_a_SOURCES) $(librmq_a_SOURCES) \
 	$(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(libsubstrsortercartesian_a_SOURCES) \
 	$(cartesianTreeTest_SOURCES) $(generateInput_SOURCES) \
 	$(hackerrank_version_SOURCES) $(mainTest_SOURCES) \
-	$(rmqTest_SOURCES) $(skewMain_SOURCES) $(trivialMain_SOURCES)
+	$(rmqTest_SOURCES) $(skewCartesianMain_SOURCES) \
+	$(skewMain_SOURCES) $(trivialMain_SOURCES)
 DIST_SOURCES = $(libcartesiantree_a_SOURCES) $(librmq_a_SOURCES) \
 	$(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(libsubstrsortercartesian_a_SOURCES) \
 	$(cartesianTreeTest_SOURCES) $(generateInput_SOURCES) \
 	$(hackerrank_version_SOURCES) $(mainTest_SOURCES) \
-	$(rmqTest_SOURCES) $(skewMain_SOURCES) $(trivialMain_SOURCES)
+	$(rmqTest_SOURCES) $(skewCartesianMain_SOURCES) \
+	$(skewMain_SOURCES) $(trivialMain_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -300,12 +315,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a librmq.a
+noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a librmq.a libsubstrsortercartesian.a
 libstringer_a_SOURCES = stringer.cpp
 libsubstrsorter_a_SOURCES = substrSorter.cpp
 libsubstrsorter_a_LIBADD = librmq.a
 libcartesiantree_a_SOURCES = CartesianTree.cpp
 librmq_a_SOURCES = RMQ.cpp
+libsubstrsortercartesian_a_SOURCES = substrSorterCartesian.cpp
+libsubstrsortercartesian_a_LIBADD = libcartesiantree.a
 trivialMain_SOURCES = trivialMain.cpp
 generateInput_SOURCES = generateInput.cpp
 mainTest_SOURCES = mainTest.cpp libsubstrsorter.a
@@ -317,6 +334,8 @@ skewMain_LDADD = libstringer.a libsubstrsorter.a librmq.a
 hackerrank_version_SOURCES = hackerrank_version.cpp
 rmqTest_SOURCES = RmqTester.cpp
 rmqTest_LDADD = librmq.a
+skewCartesianMain_SOURCES = skewCartesianMain.cpp
+skewCartesianMain_LDADD = libstringer.a libsubstrsortercartesian.a libcartesiantree.a
 all: all-am
 
 .SUFFIXES:
@@ -374,6 +393,11 @@ libsubstrsorter.a: $(libsubstrsorter_a_OBJECTS) $(libsubstrsorter_a_DEPENDENCIES
 	$(AM_V_AR)$(libsubstrsorter_a_AR) libsubstrsorter.a $(libsubstrsorter_a_OBJECTS) $(libsubstrsorter_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libsubstrsorter.a
 
+libsubstrsortercartesian.a: $(libsubstrsortercartesian_a_OBJECTS) $(libsubstrsortercartesian_a_DEPENDENCIES) $(EXTRA_libsubstrsortercartesian_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libsubstrsortercartesian.a
+	$(AM_V_AR)$(libsubstrsortercartesian_a_AR) libsubstrsortercartesian.a $(libsubstrsortercartesian_a_OBJECTS) $(libsubstrsortercartesian_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libsubstrsortercartesian.a
+
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
@@ -397,6 +421,10 @@ rmqTest$(EXEEXT): $(rmqTest_OBJECTS) $(rmqTest_DEPENDENCIES) $(EXTRA_rmqTest_DEP
 	@rm -f rmqTest$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(rmqTest_OBJECTS) $(rmqTest_LDADD) $(LIBS)
 
+skewCartesianMain$(EXEEXT): $(skewCartesianMain_OBJECTS) $(skewCartesianMain_DEPENDENCIES) $(EXTRA_skewCartesianMain_DEPENDENCIES) 
+	@rm -f skewCartesianMain$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(skewCartesianMain_OBJECTS) $(skewCartesianMain_LDADD) $(LIBS)
+
 skewMain$(EXEEXT): $(skewMain_OBJECTS) $(skewMain_DEPENDENCIES) $(EXTRA_skewMain_DEPENDENCIES) 
 	@rm -f skewMain$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(skewMain_OBJECTS) $(skewMain_LDADD) $(LIBS)
@@ -418,9 +446,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/generateInput.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hackerrank_version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mainTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skewCartesianMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skewMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substrSorter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substrSorterCartesian.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trivialMain.Po@am__quote@
 
 .cpp.o:

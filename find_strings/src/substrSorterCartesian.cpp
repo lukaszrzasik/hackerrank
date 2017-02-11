@@ -1,4 +1,4 @@
-#include "substrSorter.hpp"
+#include "substrSorterCartesian.hpp"
 
 #include <iostream>
 #include <cmath>
@@ -222,8 +222,8 @@ void SubstrSorter::translateS12()
 	recursiveAlg->removeZeroesAndDuplicatesFromSA();
 	//std::cout << "createLCP" << std::endl;
 	recursiveAlg->createLCP();
-	recursiveAlg->rmqLCP.reset(new RMQ(recursiveAlg->LCP));
-//	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
+//	recursiveAlg->rmqLCP.reset(new RMQ(recursiveAlg->LCP));
+	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
 	//std::cout << "calcSubstrLen" << std::endl;
 	recursiveAlg->calcSubstrLen();
 	//std::cout << "translateS12 finished" << std::endl;
@@ -458,9 +458,39 @@ void SubstrSorter::createLCP()
 				//std::cout << "low = " << low << " high = " << high << std::endl;
 				if (static_cast<std::size_t>(low - 1) > 100000) {
 					std::cout << "low = " << low << std::endl;
+					std::cout << "a = " << a << " b = " << b << " l = " << l << std::endl;
+					for (const auto& i : combinedStrings) {
+						std::cout << i << ' ';
+					}
+					std::cout << std::endl;
+					std::cout << std::endl;
+
+					for (const auto& i : s12encoded) {
+						std::cout << i << ' ';
+					}
+					std::cout << std::endl;
+					std::cout << std::endl;
+
+					for (const auto& i : SA) {
+						std::cout << i << ' ';
+					}
+					std::cout << std::endl;
+					std::cout << std::endl;
+
+					for (const auto& i : LCP) {
+						std::cout << i << ' ';
+					}
+					std::cout << std::endl;
+					std::cout << std::endl;
+
+					for (const auto& i : recursiveAlg->LCP) {
+						std::cout << i << ' ';
+					}
+					std::cout << std::endl;
+					std::cout << std::endl;
 				}
-				int temp = (*recursiveAlg->rmqLCP)(low - 1, high - 2);
-//				int temp = recursiveAlg->lcpTree->rangeMinimaQuery(low - 1, high - 2);
+//				int temp = (*recursiveAlg->rmqLCP)(low - 1, high - 2);
+				int temp = recursiveAlg->lcpTree->rangeMinimaQuery(low - 1, high - 2);
 				//std::cout << "temp = " << temp << std::endl;
 				equalNo += 3 * recursiveAlg->LCP[temp];
 				//std::cout << "equalNo after rangeMinimaQuery = " << equalNo << std::endl;
