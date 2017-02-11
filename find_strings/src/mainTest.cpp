@@ -222,7 +222,7 @@ public:
 		}
 		cout << endl;
 
-		s.recursiveAlg->lcpTree.reset(new CartesianTree(s.recursiveAlg->LCP));
+		s.recursiveAlg->rmqLCP.reset(new RMQ(s.recursiveAlg->LCP));
 
 		s.recursiveAlg->calcSubstrLen();
 		for (const int i : s.recursiveAlg->substrLength) {

@@ -222,7 +222,7 @@ void SubstrSorter::translateS12()
 	recursiveAlg->removeZeroesAndDuplicatesFromSA();
 	//std::cout << "createLCP" << std::endl;
 	recursiveAlg->createLCP();
-	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
+	recursiveAlg->rmqLCP.reset(new RMQ(recursiveAlg->LCP));
 	//std::cout << "calcSubstrLen" << std::endl;
 	recursiveAlg->calcSubstrLen();
 	//std::cout << "translateS12 finished" << std::endl;
@@ -455,7 +455,7 @@ void SubstrSorter::createLCP()
 				int low = aa < bb ? aa : bb;
 				int high = aa < bb ? bb : aa;
 				//std::cout << "low = " << low << " high = " << high << std::endl;
-				int temp = recursiveAlg->lcpTree->rangeMinimaQuery(low - 1, high - 2);
+				int temp = (*recursiveAlg->rmqLCP)(low - 1, high - 2);
 				//std::cout << "temp = " << temp << std::endl;
 				equalNo += 3 * recursiveAlg->LCP[temp];
 				//std::cout << "equalNo after rangeMinimaQuery = " << equalNo << std::endl;

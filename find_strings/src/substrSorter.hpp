@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CartesianTree.hpp"
+#include "RMQ.hpp"
 
 #include <string>
 #include <vector>
@@ -49,7 +49,7 @@ private:
 	std::vector<int> s12encoded;
 
 	std::unique_ptr<SubstrSorter> recursiveAlg;
-	std::unique_ptr<CartesianTree> lcpTree;
+	std::unique_ptr<RMQ> rmqLCP;
 	
 	friend class Tester;
 };

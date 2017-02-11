@@ -16,9 +16,10 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
-#include <memory>
 
-using namespace std;
+#include <vector>
+
+#include <string>
 
 class IStringer
 {
@@ -28,140 +29,265 @@ public:
 	virtual void clearStrings() = 0;
 };
 
-class CartesianTree
+#include <vector>
+#include <iostream>
+
+class RMQ
 {
 public:
-	CartesianTree() = delete;
-	CartesianTree(const CartesianTree&) = delete;
-	CartesianTree(CartesianTree&&) = delete;
+	RMQ() = delete;
+	RMQ(const RMQ&) = delete;
+	RMQ(RMQ&&) = delete;
 
-	CartesianTree(const std::vector<int>& v);
+	RMQ(const std::vector<int>& a);
 
-	int rangeMinimaQuery(int l, int h);
+	std::size_t operator()(std::size_t low, std::size_t high);
 
 private:
-	class CartesianTreeNode
-	{
-	public:
-		typedef std::shared_ptr<CartesianTreeNode> CartesianTreeNodePtr;
+	void calcBlockMinima();
+	void createSparseTable();
+	void createFullTables();
+	std::size_t getCartesianNo(std::size_t index);
+	void createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std::size_t index);
 
-		CartesianTreeNode() = delete;
-		CartesianTreeNode(const CartesianTreeNode&) = delete;
-		CartesianTreeNode(CartesianTreeNode&&) = delete;
+	const std::vector<int>& array;
 
-		CartesianTreeNode(int v);
+	std::vector<std::size_t> blockMinima;
+	std::vector<std::vector<std::size_t>> sparseTable;
+	std::vector<std::size_t> blockToCartesian;
+	std::vector<std::vector<std::vector<std::size_t>>> cartesianToFullTable;
 
-		int rangeMinimaQuery(int l, int h);
+	std::size_t n;
+	std::size_t b;
 
-		int getValue();
-		void setLeft(CartesianTreeNodePtr&& l);
-		void setRight(CartesianTreeNodePtr&& r);
-		CartesianTreeNodePtr getLeft();
-		CartesianTreeNodePtr getRight();
-
-	private:
-		int value;
-		CartesianTreeNodePtr left;
-		CartesianTreeNodePtr right;
-	};
-
-	typedef CartesianTreeNode::CartesianTreeNodePtr CartesianTreeNodePtr;
-
-	CartesianTreeNodePtr root;
-
-	friend class CartesianTreeTester;
+	friend class RmqTester;
 };
 
-CartesianTree::CartesianTree(const std::vector<int>& v)
+#include <cmath>
+#include <iostream>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+
+using namespace std;
+
+RMQ::RMQ(const std::vector<int>& a) : array(a)
 {
-	if (v.empty()) {
-		std::cout << "CartesianTree constructor error: empty vector provided" << std::endl;
+	n = array.size();
+	if (n == 0) {
+		//std::cout << "RMQ ctor error: array is empty" << std::endl;
 		return;
 	}
+	b = static_cast<std::size_t>(log2(n)) / 4;
+	b = b == 0 ? 1 : b;
 
-	std::stack<CartesianTreeNodePtr> s;
-	root.reset(new CartesianTreeNode(0));
-	s.push(root);
+	//std::cout << "calcBlockMinima" << std::endl;
+	calcBlockMinima();
+	//std::cout << "createSparseTable" << std::endl;
+	createSparseTable();
+	//std::cout << "createFullTables" << std::endl;
+	createFullTables();
+	//std::cout << "createFullTables end" << std::endl;
+}
 
-	for (unsigned int index = 1; index < v.size(); ++index) {
-		CartesianTreeNodePtr lastPopped;
-		CartesianTreeNodePtr current;
-		while (!s.empty() && v[index] < v[s.top()->getValue()]) {
-			lastPopped = s.top();
+void RMQ::calcBlockMinima()
+{
+	blockMinima.resize((n + b - 1) / b);
+	for (std::size_t i = 0; i < n; i += b) {
+		std::size_t min = i;
+		for (std::size_t j = 0; j < b && i + j < array.size(); ++j) {
+			if (array[i + j] < array[min]) {
+				min = i + j;
+			}
+		}
+		blockMinima[i / b] = min;
+	}
+}
+
+void RMQ::createSparseTable()
+{
+	std::size_t blkMinTblSize = blockMinima.size();
+	sparseTable.resize(blkMinTblSize);
+	std::size_t length = 1;
+	std::size_t acum = 1 << (length - 1);
+	//std::cout << "Resize and initialize" << std::endl;
+ 	for (std::size_t i = 0; i < blkMinTblSize; ++i) {
+		if (i == acum) {
+			++length;
+			acum += 1 << (length - 1);
+		}
+		//std::cout << "i = " << i << " length = " << length << " acum = " << acum << std::endl;
+		sparseTable[blkMinTblSize - i - 1].resize(length);
+		sparseTable[blkMinTblSize - i - 1][0] = blkMinTblSize - i - 1;
+	}
+
+	//std::cout << "Create sparse table" << std::endl;
+	for (std::size_t j = 1; j < sparseTable[0].size(); ++j) {
+		for (std::size_t i = 0; i < sparseTable.size(); ++i) {
+			if (i + (1 << (j - 1)) >= sparseTable.size()
+				|| j - 1 >= sparseTable[i + (1 << (j - 1))].size()) {
+				//std::cout << "break" << std::endl;
+				break;
+			}
+			//std::cout << "i = " << i << " j = " << j << std::endl;
+			if (array[blockMinima[sparseTable[i][j - 1]]]
+				< array[blockMinima[sparseTable[i + (1 << (j - 1))][j - 1]]]) {
+				sparseTable[i][j] = sparseTable[i][j - 1];
+			} else {
+				sparseTable[i][j] = sparseTable[i + (1 << (j - 1))][j - 1];
+			}
+		}
+	}
+}
+
+void RMQ::createFullTables()
+{
+	blockToCartesian.resize(blockMinima.size());
+	cartesianToFullTable.resize(pow(4, b));
+	for (std::size_t i = 0; i < blockToCartesian.size(); ++i) {
+		std::size_t cartesianNo = getCartesianNo(i * b);
+		blockToCartesian[i] = cartesianNo;
+		if (cartesianToFullTable[cartesianNo].empty()) {
+			createFullTable(cartesianToFullTable[cartesianNo], i * b);
+		}
+	}
+}
+
+std::size_t RMQ::getCartesianNo(std::size_t index)
+{
+	std::size_t cartesianNo = 0;
+	std::size_t cartesianNoLen = 2 * b;
+	std::size_t bit = 0;
+
+	std::stack<int> s;
+	s.push(index);
+	cartesianNo |= 1 << (cartesianNoLen - 1 - bit++);
+
+	for (std::size_t i = index + 1; i < index + b && i < array.size(); ++i) {
+		while (!s.empty() && array[i] < array[s.top()]) {
 			s.pop();
+			bit++;
 		}
 		
-		if (s.empty()) {
-			root.reset(new CartesianTreeNode(index));
-			root->setLeft(std::move(lastPopped));
-			s.push(root);
-		} else {
-			s.top()->setRight(CartesianTreeNodePtr(new CartesianTreeNode(index)));
-			s.top()->getRight()->setLeft(std::move(lastPopped));
-			s.push(s.top()->getRight());
+		s.push(i);
+		cartesianNo |= 1 << (cartesianNoLen - 1 - bit++);
+	}
+
+	return cartesianNo;
+}
+
+void RMQ::createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std::size_t index)
+{
+	std::size_t fullTableSize = std::min(b, n - index);
+	fullTable.resize(fullTableSize);
+	for (std::size_t i = 0; i < fullTable.size(); ++i) {
+		fullTable[i].resize(fullTableSize - i);
+		fullTable[i][0] = i;
+	}
+
+	for (std::size_t j = 1; j < fullTable[0].size(); ++j) {
+		for (std::size_t i = 0; i < fullTable.size() - j; ++i) {
+			if (array[index + fullTable[i][j - 1]] < array[index + fullTable[i + 1][j - 1]]) {
+				fullTable[i][j] = fullTable[i][j - 1];
+			} else {
+				fullTable[i][j] = fullTable[i + 1][j - 1];
+			}
 		}
 	}
 }
 
-int CartesianTree::rangeMinimaQuery(int l, int h)
+std::size_t RMQ::operator()(std::size_t low, std::size_t high)
 {
-	if (!root) {
-		return -1;
+	//std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
+	if (low > high) {
+		//std::cout << "RMQ::operator() error: low is greater than high" << std::endl;
+		return 0;
 	}
-	return root->rangeMinimaQuery(l, h);
-}
 
-int CartesianTree::CartesianTreeNode::rangeMinimaQuery(int l, int h)
-{
-	int ret;
+/*	cout << "b = " << b << endl;
 
-	if (getValue() > h) {
-		if (!left) {
-			ret = -1;
-		} else {
-			ret = left->rangeMinimaQuery(l, h);
+	for (const auto& i : blockToCartesian) {
+		cout << bitset<sizeof(size_t)>(i) << endl;
+	}
+	cout << endl;
+
+	size_t cartesianNo = 0;
+	for (const auto& i : cartesianToFullTable) {
+		if (!i.empty()) {
+			cout << "CartesianNo = " << bitset<sizeof(size_t)>(cartesianNo) << endl;
 		}
-	} else if (getValue() < l) {
-		if (!right) {
-			ret = -1;
-		} else {
-			ret = right->rangeMinimaQuery(l, h);
+		for (const auto& j : i) {
+			for (const auto& k : j) {
+				cout << k << ' ';
+			}
+			cout << endl;
 		}
+		if (!i.empty()) {
+			cout << endl;
+		}
+		cartesianNo++;
+	}
+	cout << endl; */
+
+	if (low /  b == high / b) {
+		std::size_t ret = cartesianToFullTable[blockToCartesian[low / b]][low % b][0] + low / b * b;
+		//std::cout << "RMQ::operator() return = " << ret << std::endl;
+		return ret;
+	}
+
+	std::size_t lowBlockHigh = low / b * b + b - 1;
+	std::size_t highBlockLow = high / b * b;
+	//std::cout << "lowBlockHigh = " << lowBlockHigh << " highBlockLow = " << highBlockLow << std::endl;
+	std::size_t lowBlockMin = cartesianToFullTable[blockToCartesian[low / b]][low % b][lowBlockHigh % b - low % b] + low / b * b;
+	//std::cout << "lowBlockMin = " << lowBlockMin << std::endl;
+	std::size_t highBlockMin = cartesianToFullTable[blockToCartesian[high / b]][highBlockLow % b][high % b - highBlockLow % b] + high / b * b;
+	//std::cout << "highBlockMin = " << highBlockMin << std::endl;
+
+	if (low / b + 1 == high / b) {
+		std::size_t ret = array[lowBlockMin] < array[highBlockMin] ? lowBlockMin : highBlockMin;
+		//std::cout << "RMQ::operator() return = " << ret << std::endl;
+		return ret;
+	}
+
+	std::size_t sparseLow = low / b + 1;
+	std::size_t sparseHigh = high / b - 1;
+	std::size_t j = static_cast<std::size_t>(log2(sparseHigh - sparseLow + 1));
+	std::size_t sparseMin;
+	if (array[blockMinima[sparseTable[sparseLow][j]]] < array[blockMinima[sparseTable[sparseHigh - std::pow(2, j) + 1][j]]]) {
+		sparseMin = blockMinima[sparseTable[sparseLow][j]];
 	} else {
-		ret = getValue();
+		sparseMin = blockMinima[sparseTable[sparseHigh - std::pow(2, j) + 1][j]];
 	}
+	//std::cout << "sparseMin = " << sparseMin << std::endl;
 
+	size_t min = array[lowBlockMin] < array[highBlockMin] ? lowBlockMin : highBlockMin;
+	std::size_t ret = array[min] < array[sparseMin] ? min : sparseMin;
+	//std::cout << "RMQ::operator() return = " << ret << std::endl;
 	return ret;
 }
 
-CartesianTree::CartesianTreeNode::CartesianTreeNode(int v) : value(v)
-{
-}
 
-int CartesianTree::CartesianTreeNode::getValue()
-{
-	return value;
-}
 
-void CartesianTree::CartesianTreeNode::setLeft(CartesianTreeNodePtr&& l)
-{
-	left = l;
-}
 
-void CartesianTree::CartesianTreeNode::setRight(CartesianTreeNodePtr&& r)
-{
-	right = r;
-}
 
-CartesianTree::CartesianTreeNodePtr CartesianTree::CartesianTreeNode::getLeft()
-{
-	return left;
-}
 
-CartesianTree::CartesianTreeNodePtr CartesianTree::CartesianTreeNode::getRight()
-{
-	return right;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include <string>
+#include <vector>
+#include <memory>
 
 class SubstrSorter
 {
@@ -206,11 +332,10 @@ private:
 	std::vector<int> s12encoded;
 
 	std::unique_ptr<SubstrSorter> recursiveAlg;
-	std::unique_ptr<CartesianTree> lcpTree;
+	std::unique_ptr<RMQ> rmqLCP;
 	
 	friend class Tester;
 };
-
 namespace {
 	const char a = 97 - 1; // 'a' ASCII code minus one (word seperator)
 	const char engAlphSize = 26 + 1; // +1 for word separator
@@ -430,7 +555,7 @@ void SubstrSorter::translateS12()
 	recursiveAlg->removeZeroesAndDuplicatesFromSA();
 	//std::cout << "createLCP" << std::endl;
 	recursiveAlg->createLCP();
-	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
+	recursiveAlg->rmqLCP.reset(new RMQ(recursiveAlg->LCP));
 	//std::cout << "calcSubstrLen" << std::endl;
 	recursiveAlg->calcSubstrLen();
 	//std::cout << "translateS12 finished" << std::endl;
@@ -663,7 +788,7 @@ void SubstrSorter::createLCP()
 				int low = aa < bb ? aa : bb;
 				int high = aa < bb ? bb : aa;
 				//std::cout << "low = " << low << " high = " << high << std::endl;
-				int temp = recursiveAlg->lcpTree->rangeMinimaQuery(low - 1, high - 2);
+				int temp = (*recursiveAlg->rmqLCP)(low - 1, high - 2);
 				//std::cout << "temp = " << temp << std::endl;
 				equalNo += 3 * recursiveAlg->LCP[temp];
 				//std::cout << "equalNo after rangeMinimaQuery = " << equalNo << std::endl;
@@ -810,6 +935,15 @@ std::string SubstrSorter::getSubstr(int k) const
 	return result;
 }
 
+
+
+
+
+
+
+
+
+
 class Stringer : public IStringer
 {
 public:
@@ -843,6 +977,8 @@ void Stringer::clearStrings()
 	strings.clear();
 	invalidated = true;
 }
+
+using namespace std;
 
 /* Head ends here */
 void findStrings (vector<string> a, vector<int> a_query) {
