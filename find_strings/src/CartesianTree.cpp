@@ -36,6 +36,9 @@ CartesianTree::CartesianTree(const std::vector<int>& v)
 
 int CartesianTree::rangeMinimaQuery(int l, int h)
 {
+	if (l > h) {
+		std::cout << "CartesianTree::rangeMinimaQuery error: low greater than high" << std::endl;
+	}
 	if (!root) {
 		return -1;
 	}

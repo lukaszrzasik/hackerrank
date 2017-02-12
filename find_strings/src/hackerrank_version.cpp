@@ -18,18 +18,6 @@
 #include <map>
 
 #include <vector>
-
-#include <string>
-
-class IStringer
-{
-public:
-	virtual std::string operator[] (const unsigned int query) const = 0;
-	virtual void addString(const std::string& w) = 0;
-	virtual void clearStrings() = 0;
-};
-
-#include <vector>
 #include <iostream>
 
 class RMQ
@@ -149,6 +137,19 @@ void RMQ::createFullTables()
 		blockToCartesian[i] = cartesianNo;
 		if (cartesianToFullTable[cartesianNo].empty()) {
 			createFullTable(cartesianToFullTable[cartesianNo], i * b);
+//			if (cartesianNo == 0b111000) {
+//				std::cout << "i = " << i << " b = " << b << std::endl;
+//				std::cout << "index = " << i * b << std::endl;
+//				std::cout << "111000 full table after creation:" << std::endl;
+//				for (const auto& i : cartesianToFullTable[cartesianNo]) {
+//					for (const auto& j : i) {
+//						cout << j << ' ';
+//					}
+//					std::cout << std::endl;
+//				}
+//				std::cout << std::endl;
+//
+//			}
 		}
 	}
 }
@@ -180,6 +181,13 @@ void RMQ::createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std:
 {
 	std::size_t fullTableSize = std::min(b, n - index);
 	fullTable.resize(fullTableSize);
+//	if (index == 0) {
+//		std::cout << "array when index 0:" << std::endl;
+//		for (int i = index; i < 3; ++i) {
+//			std::cout << array[i] << ' ';
+//		}
+//		std::cout << std::endl;
+//	}
 	for (std::size_t i = 0; i < fullTable.size(); ++i) {
 		fullTable[i].resize(fullTableSize - i);
 		fullTable[i][0] = i;
@@ -187,7 +195,7 @@ void RMQ::createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std:
 
 	for (std::size_t j = 1; j < fullTable[0].size(); ++j) {
 		for (std::size_t i = 0; i < fullTable.size() - j; ++i) {
-			if (array[index + fullTable[i][j - 1]] < array[index + fullTable[i + 1][j - 1]]) {
+			if (array[index + fullTable[i][j - 1]] <= array[index + fullTable[i + 1][j - 1]]) {
 				fullTable[i][j] = fullTable[i][j - 1];
 			} else {
 				fullTable[i][j] = fullTable[i + 1][j - 1];
@@ -200,37 +208,13 @@ std::size_t RMQ::operator()(std::size_t low, std::size_t high)
 {
 	//std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
 	if (low > high) {
-		//std::cout << "RMQ::operator() error: low is greater than high" << std::endl;
+		std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
+		std::cout << "RMQ::operator() error: low is greater than high" << std::endl;
 		return 0;
 	}
 
-/*	cout << "b = " << b << endl;
-
-	for (const auto& i : blockToCartesian) {
-		cout << bitset<sizeof(size_t)>(i) << endl;
-	}
-	cout << endl;
-
-	size_t cartesianNo = 0;
-	for (const auto& i : cartesianToFullTable) {
-		if (!i.empty()) {
-			cout << "CartesianNo = " << bitset<sizeof(size_t)>(cartesianNo) << endl;
-		}
-		for (const auto& j : i) {
-			for (const auto& k : j) {
-				cout << k << ' ';
-			}
-			cout << endl;
-		}
-		if (!i.empty()) {
-			cout << endl;
-		}
-		cartesianNo++;
-	}
-	cout << endl; */
-
 	if (low /  b == high / b) {
-		std::size_t ret = cartesianToFullTable[blockToCartesian[low / b]][low % b][0] + low / b * b;
+		std::size_t ret = cartesianToFullTable[blockToCartesian[low / b]][low % b][high % b - low % b] + low / b * b;
 		//std::cout << "RMQ::operator() return = " << ret << std::endl;
 		return ret;
 	}
@@ -238,8 +222,25 @@ std::size_t RMQ::operator()(std::size_t low, std::size_t high)
 	std::size_t lowBlockHigh = low / b * b + b - 1;
 	std::size_t highBlockLow = high / b * b;
 	//std::cout << "lowBlockHigh = " << lowBlockHigh << " highBlockLow = " << highBlockLow << std::endl;
+	//std::cout << "low block cartesianNo = " << std::bitset<sizeof(std::size_t)>(blockToCartesian[low / b]) << std::endl;
+	//std::cout << "low block full table:" << std::endl;
+//	for (const auto& i : cartesianToFullTable[blockToCartesian[low / b]]) {
+//		for (const auto& j : i) {
+//			cout << j << ' ';
+//		}
+//		//std::cout << std::endl;
+//	}
+	//std::cout << std::endl;
+//	for (const auto& i : cartesianToFullTable[blockToCartesian[low / b]]) {
+//		for (const auto& j : i) {
+//			cout << array[j  + low / b * b] << ' ';
+//		}
+//		//std::cout << std::endl;
+//	}
+	//std::cout << std::endl;
 	std::size_t lowBlockMin = cartesianToFullTable[blockToCartesian[low / b]][low % b][lowBlockHigh % b - low % b] + low / b * b;
 	//std::cout << "lowBlockMin = " << lowBlockMin << std::endl;
+	//std::cout << "high block cartesianNo = " << std::bitset<sizeof(std::size_t)>(blockToCartesian[high / b]) << std::endl;
 	std::size_t highBlockMin = cartesianToFullTable[blockToCartesian[high / b]][highBlockLow % b][high % b - highBlockLow % b] + high / b * b;
 	//std::cout << "highBlockMin = " << highBlockMin << std::endl;
 
@@ -284,6 +285,7 @@ std::size_t RMQ::operator()(std::size_t low, std::size_t high)
 
 
 
+//#include "CartesianTree.hpp"
 
 #include <string>
 #include <vector>
@@ -333,9 +335,14 @@ private:
 
 	std::unique_ptr<SubstrSorter> recursiveAlg;
 	std::unique_ptr<RMQ> rmqLCP;
+//	std::unique_ptr<CartesianTree> lcpTree;
 	
 	friend class Tester;
 };
+
+#include <iostream>
+#include <cmath>
+
 namespace {
 	const char a = 97 - 1; // 'a' ASCII code minus one (word seperator)
 	const char engAlphSize = 26 + 1; // +1 for word separator
@@ -434,9 +441,9 @@ void SubstrSorter::radixSort(std::vector<int>& saToSort, int alphabetSize, int s
 		for (const int i : saToSort) {
 			alphabetCounter[abs(combinedStrings[i + offset])]++;
 		}	
-		for (int i : alphabetCounter) {
-			//std::cout << i << ' ';
-		}
+//		for (int i : alphabetCounter) {
+//			//std::cout << i << ' ';
+//		}
 		//std::cout << std::endl;
 
 		// accumulate positions
@@ -445,9 +452,9 @@ void SubstrSorter::radixSort(std::vector<int>& saToSort, int alphabetSize, int s
 			alphabetCounter[i] = sum;
 			sum += temp;
 		}
-		for (int i : alphabetCounter) {
-			//std::cout << i << ' ';
-		}
+//		for (int i : alphabetCounter) {
+//			//std::cout << i << ' ';
+//		}
 		//std::cout << std::endl;
 
 		// sort
@@ -456,9 +463,9 @@ void SubstrSorter::radixSort(std::vector<int>& saToSort, int alphabetSize, int s
 			saToSort[alphabetCounter[abs(combinedStrings[saToSortCopy[i] + offset])]++] =
 				saToSortCopy[i];
 		}
-		for (int i : saToSort) {
-			//std::cout << i << ' ';
-		}
+//		for (int i : saToSort) {
+//			//std::cout << i << ' ';
+//		}
 		//std::cout << std::endl;
 	}
 }
@@ -556,6 +563,7 @@ void SubstrSorter::translateS12()
 	//std::cout << "createLCP" << std::endl;
 	recursiveAlg->createLCP();
 	recursiveAlg->rmqLCP.reset(new RMQ(recursiveAlg->LCP));
+//	recursiveAlg->lcpTree.reset(new CartesianTree(recursiveAlg->LCP));
 	//std::cout << "calcSubstrLen" << std::endl;
 	recursiveAlg->calcSubstrLen();
 	//std::cout << "translateS12 finished" << std::endl;
@@ -570,9 +578,9 @@ void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
 		int basePos = getS12EncodedPosition(i + offset);
 		alphabetCounter[abs(s12encoded[basePos])]++;
 	}	
-	for (int i : alphabetCounter) {
-		//std::cout << i << ' ';
-	}
+//	for (int i : alphabetCounter) {
+//		//std::cout << i << ' ';
+//	}
 	//std::cout << std::endl;
 
 	// accumulate positions
@@ -581,9 +589,9 @@ void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
 		alphabetCounter[i] = sum;
 		sum += temp;
 	}
-	for (int i : alphabetCounter) {
-		//std::cout << i << ' ';
-	}
+//	for (int i : alphabetCounter) {
+//		//std::cout << i << ' ';
+//	}
 	//std::cout << std::endl;
 
 	// sort
@@ -593,9 +601,9 @@ void SubstrSorter::radixSortBasedOnS12(std::vector<int>& saToSort, int offset)
 		saToSort[alphabetCounter[abs(s12encoded[basePos])]++] =
 			saToSortCopy[i];
 	}
-	for (int i : saToSort) {
-		//std::cout << i << ' ';
-	}
+//	for (int i : saToSort) {
+//		//std::cout << i << ' ';
+//	}
 	//std::cout << std::endl;
 }
 
@@ -704,9 +712,9 @@ void SubstrSorter::deepEncode(std::vector<int>& result) {
 
 		//std::cout << "currentValue = " << currentValue << std::endl;
 		result[SA[i]] = currentValue * wordEnd;
-		for (int j : result) {
-			//std::cout << j << ' ';
-		}
+//		for (int j : result) {
+//			//std::cout << j << ' ';
+//		}
 		//std::cout << std::endl;
 
 		previousElement = SA[i];
@@ -764,20 +772,23 @@ void SubstrSorter::createLCP()
 {
 	LCP.resize(SA.size());
 	for (size_t i = 0; i < SA.size() - 1; ++i) {
-		//std::cout << "i = " << i << std::endl;
+		////std::cout << "i = " << i << std::endl;
 		int a = SA[i];
 		int b = SA[i + 1];
 		int l = 0;
 
+		//std::cout << "while ((a + l) % 3 == 0 || (b + l) % 3 == 0) {" << std::endl;
 		while ((a + l) % 3 == 0 || (b + l) % 3 == 0) {
 			++l;
 		}
 		
 		int equalNo = getSimpleEqualNo(a, b, l);
-		//std::cout << "l = " << l << std::endl;
-		//std::cout << "equalNo after getSimpleEqualNo = " << equalNo << std::endl;
+		////std::cout << "l = " << l << std::endl;
+		////std::cout << "equalNo after getSimpleEqualNo = " << equalNo << std::endl;
 
-		if (equalNo == l) {
+		//std::cout << "if (equalNo == l) {" << std::endl;
+		if (equalNo == l && combinedStrings[a + l] != 0 && combinedStrings[b + l] != 0) {
+			//std::cout << "if (recursiveAlg) {" << std::endl;
 			if (recursiveAlg) {
 				int s12encodedPosA = getS12EncodedPosition(a + l);
 				int s12encodedPosB = getS12EncodedPosition(b + l);
@@ -788,8 +799,59 @@ void SubstrSorter::createLCP()
 				int low = aa < bb ? aa : bb;
 				int high = aa < bb ? bb : aa;
 				//std::cout << "low = " << low << " high = " << high << std::endl;
+//				if (static_cast<std::size_t>(low - 1) > 100000) {
+//					std::cout << "low = " << low << std::endl;
+//				}
 				int temp = (*recursiveAlg->rmqLCP)(low - 1, high - 2);
-				//std::cout << "temp = " << temp << std::endl;
+//				if (low - 1 == 1075 && high - 2 == 1077 && temp == 1077) {
+//					std::cout << "low = " << low - 1 << " high = " << high - 2 << std::endl;
+//					std::cout << "temp = " << temp << std::endl;
+//					std::cout << "recursiveAlg->LCP[temp] = " << recursiveAlg->LCP[temp] << std::endl;
+//					std::cout << "a = " << a << " b = " << b << " l = " << l << std::endl;
+//
+//					std::cout << "combinedStrings = " << std::endl;
+//					for (const auto& i : combinedStrings) {
+//						std::cout << i << ' ';
+//					}
+//					std::cout << std::endl;
+//					std::cout << std::endl;
+//
+//					std::cout << "s12encoded = " << std::endl;
+//					for (const auto& i : s12encoded) {
+//						std::cout << i << ' ';
+//					}
+//					std::cout << std::endl;
+//					std::cout << std::endl;
+//
+//					std::cout << "SA = " << std::endl;
+//					for (const auto& i : SA) {
+//						std::cout << i << ' ';
+//					}
+//					std::cout << std::endl;
+//					std::cout << std::endl;
+//
+//					std::cout << "LCP = " << std::endl;
+//					for (const auto& i : LCP) {
+//						std::cout << i << ' ';
+//					}
+//					std::cout << std::endl;
+//					std::cout << std::endl;
+//
+//					std::cout << "recursiveAlg->LCP = " << std::endl;
+//					for (int i = 1075; i <= 1077; ++i) {
+//						std::cout << recursiveAlg->LCP[i] << ' ';
+//					}
+//					std::cout << std::endl;
+//					std::cout << std::endl;
+//
+//					std::cout << "recursiveAlg->LCP = " << std::endl;
+//					for (const auto& i : recursiveAlg->LCP) {
+//						std::cout << i << ' ';
+//					}
+//					std::cout << std::endl;
+//					std::cout << std::endl;
+//				}
+//				int temp = recursiveAlg->lcpTree->rangeMinimaQuery(low - 1, high - 2);
 				equalNo += 3 * recursiveAlg->LCP[temp];
 				//std::cout << "equalNo after rangeMinimaQuery = " << equalNo << std::endl;
 			}
@@ -938,6 +1000,15 @@ std::string SubstrSorter::getSubstr(int k) const
 
 
 
+#include <string>
+
+class IStringer
+{
+public:
+	virtual std::string operator[] (const unsigned int query) const = 0;
+	virtual void addString(const std::string& w) = 0;
+	virtual void clearStrings() = 0;
+};
 
 
 

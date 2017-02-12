@@ -1,4 +1,4 @@
-noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a librmq.a libsubstrsortercartesian.a
+noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a librmq.a libsubstrsortercartesian.a libstringercartesian.a
 libstringer_a_SOURCES = stringer.cpp
 libsubstrsorter_a_SOURCES = substrSorter.cpp
 libsubstrsorter_a_LIBADD = librmq.a
@@ -6,6 +6,7 @@ libcartesiantree_a_SOURCES = CartesianTree.cpp
 librmq_a_SOURCES = RMQ.cpp
 libsubstrsortercartesian_a_SOURCES = substrSorterCartesian.cpp
 libsubstrsortercartesian_a_LIBADD = libcartesiantree.a
+libstringercartesian_a_SOURCES = stringerCartesian.cpp
 
 noinst_PROGRAMS = trivialMain generateInput mainTest cartesianTreeTest skewMain hackerrank_version rmqTest skewCartesianMain
 trivialMain_SOURCES = trivialMain.cpp
@@ -20,4 +21,4 @@ hackerrank_version_SOURCES = hackerrank_version.cpp
 rmqTest_SOURCES = RmqTester.cpp
 rmqTest_LDADD = librmq.a
 skewCartesianMain_SOURCES = skewCartesianMain.cpp
-skewCartesianMain_LDADD = libstringer.a libsubstrsortercartesian.a libcartesiantree.a
+skewCartesianMain_LDADD = libstringercartesian.a libsubstrsortercartesian.a libcartesiantree.a

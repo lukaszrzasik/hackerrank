@@ -119,6 +119,10 @@ libstringer_a_AR = $(AR) $(ARFLAGS)
 libstringer_a_LIBADD =
 am_libstringer_a_OBJECTS = stringer.$(OBJEXT)
 libstringer_a_OBJECTS = $(am_libstringer_a_OBJECTS)
+libstringercartesian_a_AR = $(AR) $(ARFLAGS)
+libstringercartesian_a_LIBADD =
+am_libstringercartesian_a_OBJECTS = stringerCartesian.$(OBJEXT)
+libstringercartesian_a_OBJECTS = $(am_libstringercartesian_a_OBJECTS)
 libsubstrsorter_a_AR = $(AR) $(ARFLAGS)
 libsubstrsorter_a_DEPENDENCIES = librmq.a
 am_libsubstrsorter_a_OBJECTS = substrSorter.$(OBJEXT)
@@ -147,7 +151,7 @@ rmqTest_OBJECTS = $(am_rmqTest_OBJECTS)
 rmqTest_DEPENDENCIES = librmq.a
 am_skewCartesianMain_OBJECTS = skewCartesianMain.$(OBJEXT)
 skewCartesianMain_OBJECTS = $(am_skewCartesianMain_OBJECTS)
-skewCartesianMain_DEPENDENCIES = libstringer.a \
+skewCartesianMain_DEPENDENCIES = libstringercartesian.a \
 	libsubstrsortercartesian.a libcartesiantree.a
 am_skewMain_OBJECTS = skewMain.$(OBJEXT)
 skewMain_OBJECTS = $(am_skewMain_OBJECTS)
@@ -185,14 +189,16 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libcartesiantree_a_SOURCES) $(librmq_a_SOURCES) \
-	$(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(libstringer_a_SOURCES) $(libstringercartesian_a_SOURCES) \
+	$(libsubstrsorter_a_SOURCES) \
 	$(libsubstrsortercartesian_a_SOURCES) \
 	$(cartesianTreeTest_SOURCES) $(generateInput_SOURCES) \
 	$(hackerrank_version_SOURCES) $(mainTest_SOURCES) \
 	$(rmqTest_SOURCES) $(skewCartesianMain_SOURCES) \
 	$(skewMain_SOURCES) $(trivialMain_SOURCES)
 DIST_SOURCES = $(libcartesiantree_a_SOURCES) $(librmq_a_SOURCES) \
-	$(libstringer_a_SOURCES) $(libsubstrsorter_a_SOURCES) \
+	$(libstringer_a_SOURCES) $(libstringercartesian_a_SOURCES) \
+	$(libsubstrsorter_a_SOURCES) \
 	$(libsubstrsortercartesian_a_SOURCES) \
 	$(cartesianTreeTest_SOURCES) $(generateInput_SOURCES) \
 	$(hackerrank_version_SOURCES) $(mainTest_SOURCES) \
@@ -315,7 +321,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a librmq.a libsubstrsortercartesian.a
+noinst_LIBRARIES = libstringer.a libsubstrsorter.a libcartesiantree.a librmq.a libsubstrsortercartesian.a libstringercartesian.a
 libstringer_a_SOURCES = stringer.cpp
 libsubstrsorter_a_SOURCES = substrSorter.cpp
 libsubstrsorter_a_LIBADD = librmq.a
@@ -323,6 +329,7 @@ libcartesiantree_a_SOURCES = CartesianTree.cpp
 librmq_a_SOURCES = RMQ.cpp
 libsubstrsortercartesian_a_SOURCES = substrSorterCartesian.cpp
 libsubstrsortercartesian_a_LIBADD = libcartesiantree.a
+libstringercartesian_a_SOURCES = stringerCartesian.cpp
 trivialMain_SOURCES = trivialMain.cpp
 generateInput_SOURCES = generateInput.cpp
 mainTest_SOURCES = mainTest.cpp libsubstrsorter.a
@@ -335,7 +342,7 @@ hackerrank_version_SOURCES = hackerrank_version.cpp
 rmqTest_SOURCES = RmqTester.cpp
 rmqTest_LDADD = librmq.a
 skewCartesianMain_SOURCES = skewCartesianMain.cpp
-skewCartesianMain_LDADD = libstringer.a libsubstrsortercartesian.a libcartesiantree.a
+skewCartesianMain_LDADD = libstringercartesian.a libsubstrsortercartesian.a libcartesiantree.a
 all: all-am
 
 .SUFFIXES:
@@ -387,6 +394,11 @@ libstringer.a: $(libstringer_a_OBJECTS) $(libstringer_a_DEPENDENCIES) $(EXTRA_li
 	$(AM_V_at)-rm -f libstringer.a
 	$(AM_V_AR)$(libstringer_a_AR) libstringer.a $(libstringer_a_OBJECTS) $(libstringer_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libstringer.a
+
+libstringercartesian.a: $(libstringercartesian_a_OBJECTS) $(libstringercartesian_a_DEPENDENCIES) $(EXTRA_libstringercartesian_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libstringercartesian.a
+	$(AM_V_AR)$(libstringercartesian_a_AR) libstringercartesian.a $(libstringercartesian_a_OBJECTS) $(libstringercartesian_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libstringercartesian.a
 
 libsubstrsorter.a: $(libsubstrsorter_a_OBJECTS) $(libsubstrsorter_a_DEPENDENCIES) $(EXTRA_libsubstrsorter_a_DEPENDENCIES) 
 	$(AM_V_at)-rm -f libsubstrsorter.a
@@ -449,6 +461,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skewCartesianMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skewMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringerCartesian.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substrSorter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/substrSorterCartesian.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trivialMain.Po@am__quote@

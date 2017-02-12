@@ -15,13 +15,13 @@ private:
 
 void RmqTester::testIt(vector<int> a)
 {
-	cout << "testArray:" << endl;
+	RMQ dut(a);
+
+/*	cout << "testArray:" << endl;
 	for (const auto& i : a) {
 		cout << i << ' ';
 	}
 	cout << endl;
-
-	RMQ dut(a);
 
 	cout << "Block minima: " << endl;
 	for (const auto& i : dut.blockMinima) {
@@ -44,7 +44,7 @@ void RmqTester::testIt(vector<int> a)
 	cout << "CartesianNo(6) = " << std::bitset<sizeof(std::size_t)>(dut.getCartesianNo(6)) << endl;
 	cout << "CartesianNo(9) = " << std::bitset<sizeof(std::size_t)>(dut.getCartesianNo(9)) << endl;
 
-	cout << "Full tables:" << endl;
+	cout << "Full tables:" << endl; */
 //	dut.createFullTable(dut.cartesianToFullTable[dut.getCartesianNo(0)], 0);
 	size_t cartesianNo = 0;
 	for (const auto& i : dut.cartesianToFullTable) {
@@ -64,14 +64,24 @@ void RmqTester::testIt(vector<int> a)
 	}
 	cout << endl;
 
-	cout << "min = " << dut(0, 9) << endl;
+	cout << "testArray[1074-1079]" << endl;
+	for (int i = 1074; i <= 1079; ++i) {
+		cout << a[i] << ' ';
+	}
+	cout << endl;
+
+	cout << "min = " << dut(1075, 1077) << endl;
 
 	cout << "Test finished" << endl;
 }
 
 int main()
 {
-	vector<int> testArray = {5, 2, 8, 7, 4, 6, 1, 3, 9, 0};
+	vector<int> testArray;
+	int temp;
+	while (cin >> temp) {
+		testArray.push_back(temp);
+	}
 	RmqTester tester;
 	tester.testIt(testArray);
 	cout << "Back from testIt. dut is destroyed" << endl;

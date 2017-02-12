@@ -12,19 +12,19 @@ RMQ::RMQ(const std::vector<int>& a) : array(a)
 {
 	n = array.size();
 	if (n == 0) {
-		std::cout << "RMQ ctor error: array is empty" << std::endl;
+		//std::cout << "RMQ ctor error: array is empty" << std::endl;
 		return;
 	}
 	b = static_cast<std::size_t>(log2(n)) / 4;
 	b = b == 0 ? 1 : b;
 
-	std::cout << "calcBlockMinima" << std::endl;
+	//std::cout << "calcBlockMinima" << std::endl;
 	calcBlockMinima();
-	std::cout << "createSparseTable" << std::endl;
+	//std::cout << "createSparseTable" << std::endl;
 	createSparseTable();
-	std::cout << "createFullTables" << std::endl;
+	//std::cout << "createFullTables" << std::endl;
 	createFullTables();
-	std::cout << "createFullTables end" << std::endl;
+	//std::cout << "createFullTables end" << std::endl;
 }
 
 void RMQ::calcBlockMinima()
@@ -86,6 +86,19 @@ void RMQ::createFullTables()
 		blockToCartesian[i] = cartesianNo;
 		if (cartesianToFullTable[cartesianNo].empty()) {
 			createFullTable(cartesianToFullTable[cartesianNo], i * b);
+//			if (cartesianNo == 0b111000) {
+//				std::cout << "i = " << i << " b = " << b << std::endl;
+//				std::cout << "index = " << i * b << std::endl;
+//				std::cout << "111000 full table after creation:" << std::endl;
+//				for (const auto& i : cartesianToFullTable[cartesianNo]) {
+//					for (const auto& j : i) {
+//						cout << j << ' ';
+//					}
+//					std::cout << std::endl;
+//				}
+//				std::cout << std::endl;
+//
+//			}
 		}
 	}
 }
@@ -117,6 +130,13 @@ void RMQ::createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std:
 {
 	std::size_t fullTableSize = std::min(b, n - index);
 	fullTable.resize(fullTableSize);
+//	if (index == 0) {
+//		std::cout << "array when index 0:" << std::endl;
+//		for (int i = index; i < 3; ++i) {
+//			std::cout << array[i] << ' ';
+//		}
+//		std::cout << std::endl;
+//	}
 	for (std::size_t i = 0; i < fullTable.size(); ++i) {
 		fullTable[i].resize(fullTableSize - i);
 		fullTable[i][0] = i;
@@ -124,7 +144,7 @@ void RMQ::createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std:
 
 	for (std::size_t j = 1; j < fullTable[0].size(); ++j) {
 		for (std::size_t i = 0; i < fullTable.size() - j; ++i) {
-			if (array[index + fullTable[i][j - 1]] < array[index + fullTable[i + 1][j - 1]]) {
+			if (array[index + fullTable[i][j - 1]] <= array[index + fullTable[i + 1][j - 1]]) {
 				fullTable[i][j] = fullTable[i][j - 1];
 			} else {
 				fullTable[i][j] = fullTable[i + 1][j - 1];
@@ -135,39 +155,15 @@ void RMQ::createFullTable(std::vector<std::vector<std::size_t>>& fullTable, std:
 
 std::size_t RMQ::operator()(std::size_t low, std::size_t high)
 {
-//	std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
+	//std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
 	if (low > high) {
-		//std::cout << "RMQ::operator() error: low is greater than high" << std::endl;
+		std::cout << "RMQ::operator() enetered: low = " << low << " high = " << high << std::endl;
+		std::cout << "RMQ::operator() error: low is greater than high" << std::endl;
 		return 0;
 	}
 
-/*	cout << "b = " << b << endl;
-
-	for (const auto& i : blockToCartesian) {
-		cout << bitset<sizeof(size_t)>(i) << endl;
-	}
-	cout << endl;
-
-	size_t cartesianNo = 0;
-	for (const auto& i : cartesianToFullTable) {
-		if (!i.empty()) {
-			cout << "CartesianNo = " << bitset<sizeof(size_t)>(cartesianNo) << endl;
-		}
-		for (const auto& j : i) {
-			for (const auto& k : j) {
-				cout << k << ' ';
-			}
-			cout << endl;
-		}
-		if (!i.empty()) {
-			cout << endl;
-		}
-		cartesianNo++;
-	}
-	cout << endl; */
-
 	if (low /  b == high / b) {
-		std::size_t ret = cartesianToFullTable[blockToCartesian[low / b]][low % b][0] + low / b * b;
+		std::size_t ret = cartesianToFullTable[blockToCartesian[low / b]][low % b][high % b - low % b] + low / b * b;
 		//std::cout << "RMQ::operator() return = " << ret << std::endl;
 		return ret;
 	}
@@ -175,8 +171,25 @@ std::size_t RMQ::operator()(std::size_t low, std::size_t high)
 	std::size_t lowBlockHigh = low / b * b + b - 1;
 	std::size_t highBlockLow = high / b * b;
 	//std::cout << "lowBlockHigh = " << lowBlockHigh << " highBlockLow = " << highBlockLow << std::endl;
+	//std::cout << "low block cartesianNo = " << std::bitset<sizeof(std::size_t)>(blockToCartesian[low / b]) << std::endl;
+	//std::cout << "low block full table:" << std::endl;
+//	for (const auto& i : cartesianToFullTable[blockToCartesian[low / b]]) {
+//		for (const auto& j : i) {
+//			cout << j << ' ';
+//		}
+//		//std::cout << std::endl;
+//	}
+	//std::cout << std::endl;
+//	for (const auto& i : cartesianToFullTable[blockToCartesian[low / b]]) {
+//		for (const auto& j : i) {
+//			cout << array[j  + low / b * b] << ' ';
+//		}
+//		//std::cout << std::endl;
+//	}
+	//std::cout << std::endl;
 	std::size_t lowBlockMin = cartesianToFullTable[blockToCartesian[low / b]][low % b][lowBlockHigh % b - low % b] + low / b * b;
 	//std::cout << "lowBlockMin = " << lowBlockMin << std::endl;
+	//std::cout << "high block cartesianNo = " << std::bitset<sizeof(std::size_t)>(blockToCartesian[high / b]) << std::endl;
 	std::size_t highBlockMin = cartesianToFullTable[blockToCartesian[high / b]][highBlockLow % b][high % b - highBlockLow % b] + high / b * b;
 	//std::cout << "highBlockMin = " << highBlockMin << std::endl;
 

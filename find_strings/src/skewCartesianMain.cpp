@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <map>
 
-#include "stringer.hpp"
+#include "stringerCartesian.hpp"
 
 using namespace std;
 
